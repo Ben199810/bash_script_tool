@@ -5,7 +5,7 @@ check_brew() {
 
     # 安裝 brew
     echo -e "${YELLOW}開始自動安裝 brew...${NC}"
-    curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh
+    bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 
     # 再次檢查是否安裝成功
     if ! brew -v &> /dev/null; then
@@ -37,6 +37,31 @@ check_iterm2() {
     fi
   else
     echo -e "${GREEN}iTerm2 已安裝。${NC}"
+  fi
+}
+
+check_zsh() {
+  # 檢查是否安裝 zsh
+  if ! zsh --version &> /dev/null; then
+    echo -e "${RED}zsh 未安裝，請先安裝 zsh。${NC}"
+
+    # 安裝 zsh
+    echo -e "${YELLOW}開始自動安裝 zsh...${NC}"
+    brew install zsh
+
+    # 安裝 oh-my-zsh
+    echo -e "${YELLOW}開始自動安裝 oh-my-zsh...${NC}"
+    sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
+
+    # 再次檢查是否安裝成功
+    if ! zsh --version &> /dev/null; then
+      echo -e "${RED}zsh 安裝失敗，請手動安裝。${NC}"
+      exit 1
+    else
+      echo -e "${GREEN}zsh 安裝成功。${NC}"
+    fi
+  else
+    echo -e "${GREEN}zsh 已安裝。${NC}"
   fi
 }
 
