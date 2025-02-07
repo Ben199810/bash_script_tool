@@ -19,6 +19,27 @@ check_brew() {
   fi
 }
 
+check_iterm2() {
+  # 檢查是否安裝 iterm2
+  if ! open -a iTerm &> /dev/null; then
+    echo -e "${RED}iTerm2 未安裝，請先安裝 iTerm2。${NC}"
+    
+    # 安裝 iterm2
+    echo -e "${YELLOW}開始自動安裝 iTerm2...${NC}"
+    brew install iterm2
+
+    # 再次檢查是否安裝成功
+    if ! open -a iTerm &> /dev/null; then
+      echo -e "${RED}iTerm2 安裝失敗，請手動安裝。${NC}"
+      exit 1
+    else
+      echo -e "${GREEN}iTerm2 安裝成功。${NC}"
+    fi
+  else
+    echo -e "${GREEN}iTerm2 已安裝。${NC}"
+  fi
+}
+
 check_kubectl() {
   # 檢查是否安裝 kubectl
   if ! kubectl version --client &> /dev/null; then
