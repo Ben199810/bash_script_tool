@@ -1,7 +1,10 @@
 #!/bin/bash
 
-source ./colors.sh
-source ./check_install.sh
+# 取得執行腳本當前目錄
+DIR="$(dirname $0)"
+
+source ../${DIR}/modules/colors.sh
+source ../${DIR}/modules/check_install.sh
 
 check_kubectl
 
