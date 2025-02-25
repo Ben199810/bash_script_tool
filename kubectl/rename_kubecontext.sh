@@ -14,12 +14,12 @@ CURRENT_CONTEXTS=$(kubectl config get-contexts -o=name)
 SELECTED_CONTEXT=$(echo "$CURRENT_CONTEXTS" | fzf --prompt="Select a kube context: ")
 
 # 重新命名 context
-echo -n "Enter new name for the selected context: "
+echo -n -e "${BLUE}Enter new name for the selected context: ${NC}"
 read NEW_CONTEXT_NAME
 
 # 檢查 NEW_CONTEXT_NAME 是否有輸入或是空值
 if [ -z "$NEW_CONTEXT_NAME" ]; then
-    echo "Error: New context name cannot be empty."
+    echo -e "${RED}Error: New context name cannot be empty.${NC}"
     exit 1
 fi
 

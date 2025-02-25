@@ -20,10 +20,10 @@ selected_project=$(printf "%s\n" "${project_array[@]}" | fzf --prompt="Select a 
 
 # 檢查用戶是否選擇了項目
 if [ -n "$selected_project" ]; then
-  echo "Switching to project: $selected_project"
+  echo -e "${BLUE}Switching to project: $selected_project${NC}"
   gcloud config set project "$selected_project"
-  echo "Switched to project: $(gcloud config get-value project)"
+  echo -e "${GREEN}Switched to project: $(gcloud config get-value project)${NC}"
 else
-  echo "No project selected. Exiting."
+  echo -e "${RED}No project selected. Exiting.${NC}"
   exit 1
 fi
