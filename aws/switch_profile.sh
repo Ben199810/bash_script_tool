@@ -6,7 +6,7 @@
 DIR="$(dirname $0)"
 
 # 字體顏色
-source ../${DIR}/modules/colors.sh
+source ../${DIR}/modules/default.sh
 
 set_profile() {
   export AWS_PROFILE=${selected_account}

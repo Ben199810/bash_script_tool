@@ -4,7 +4,7 @@
 DIR="$(dirname $0)"
 
 # 字體顏色
-source ../${DIR}/modules/colors.sh
+source ../${DIR}/modules/default.sh
 
 accounts_list=($(aws configure list-profiles))
 

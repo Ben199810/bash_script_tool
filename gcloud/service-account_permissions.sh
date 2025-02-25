@@ -1,7 +1,7 @@
 #!/bin/bash
 
-# 字體顏色
-source ../${DIR}/modules/colors.sh
+source ../modules/default.sh
+source ../modules/switch_gcp_project_enabled.sh
 
 # 顯示目前的 GCP 專案
 current_project=$(gcloud config get-value project)

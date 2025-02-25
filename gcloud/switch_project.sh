@@ -1,10 +1,6 @@
 #!/bin/bash
 
-# 取得執行腳本當前目錄
-DIR="$(dirname $0)"
-
-# 字體顏色
-source ../${DIR}/modules/colors.sh
+source ../modules/default.sh
 
 # 列出所有的 GCP 項目
 projects=$(gcloud projects list --format="value(projectId)")
