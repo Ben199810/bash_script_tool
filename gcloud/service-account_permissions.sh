@@ -1,4 +1,5 @@
 #!/bin/bash
+# 查看服務帳戶的權限
 
 source ../modules/default.sh
 source ../modules/switch_gcp_project_enabled.sh

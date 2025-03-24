@@ -1,6 +1,5 @@
 #!/bin/bash
-
-# 將 gcp 上的 docker image pull 下來，使用 docker image tag 更名。再 push 到 google artifact registry。
+# 將GAR 上的docker image pull 下來，使用docker image tag 更名。再push 到GAR。
 
 source ../modules/default.sh
 

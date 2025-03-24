@@ -1,5 +1,6 @@
 #!/usr/local/bin/bash
 # declare 需要 bash 4.2 以上版本, /usr/local/bin/bash 執行
+# 查看所有服務帳戶的 IAM 角色
 
 source ../modules/default.sh
 source ../modules/switch_gcp_project_enabled.sh
@@ -19,5 +20,4 @@ fi
 
 # 顯示所有的服務帳戶
 echo -e "${BLUE}Service Accounts:${NC}"
-
 echo "$iam_policy"

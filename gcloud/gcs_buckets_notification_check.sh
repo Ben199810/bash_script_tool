@@ -1,4 +1,5 @@
 #!/bin/bash
+# 查看 bucket notifications List 和 bucket IAM policy
 
 source ../modules/default.sh
 source ../modules/switch_gcp_project_enabled.sh
