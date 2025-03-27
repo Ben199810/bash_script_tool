@@ -3,6 +3,7 @@
 source ../modules/default.sh
 
 # Delete all topics
+read -p "kafka_home ($KAFKA_HOME): " KAFKA_HOME
 # 檢查 KAFKA_HOME 環境變數是否設置
 if [ -z "$KAFKA_HOME" ]; then
   echo "KAFKA_HOME 環境變數未設置。請設置該變數指向你的 Kafka 安裝目錄。"
