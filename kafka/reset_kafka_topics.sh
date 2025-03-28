@@ -1,22 +1,7 @@
 #!/bin/bash
 
 source ../modules/default.sh
-
-export KAFKA_HOME
-read -p "Kafka 安裝目錄: " KAFKA_HOME
-# 檢查 KAFKA_HOME 環境變數是否設置
-if [ -z "$KAFKA_HOME" ]; then
-  echo "KAFKA_HOME 環境變數未設置。請設置該變數指向你的 Kafka 安裝目錄。"
-  exit 1
-fi
-
-export BOOTSTRAP_SERVER
-read -p "bootstrap-server: " BOOTSTRAP_SERVER
-# 檢查 BOOTSTRAP_SERVER 環境變數是否設置
-if [ -z "$BOOTSTRAP_SERVER" ]; then
-  echo "bootstrap-server 環境變數未設置。請設置該變數指向你的 Kafka 伺服器。"
-  exit 1
-fi
+source ../modules/kafka_vm_setting.sh
 
 # 獲取所有 topic
 TOPICS=$($KAFKA_HOME/bin/kafka-topics.sh --list --bootstrap-server $BOOTSTRAP_SERVER)
