@@ -11,5 +11,11 @@ read -p "請輸入測試時間 (例如 60): " time
 
 # 開始壓力測試
 echo -e "${YELLOW}開始壓力測試...${NC}"
-ab -c $concurrency -n $requests -t $time $protocol://$url
+
+# 如果 請輸入請求數量 為空
+if [ -z "$requests" ]; then
+  ab -c $concurrency -t $time $protocol://$url
+else
+  ab -c $concurrency -n $requests -t $time $protocol://$url
+fi
 echo -e "${GREEN}壓力測試完成。${NC}"
