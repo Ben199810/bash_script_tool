@@ -7,12 +7,12 @@ source ../modules/default.sh
 read -p "是否使用預設值 (y/n): " use_default
 if [ "$use_default" == "y" ]; then
   echo -e "${GREEN}使用預設值...${NC}"
-  url=35.227.219.68/login
+  url=""
   protocol=https
   requests=50000
   concurrency=10
   time=600
-  host=admin.vir888.com
+  host=""
 else
   # 輸入需要測試的網址和請求數量
   read -p "請輸入需要測試的網址 (例如 example.com/path): " url
