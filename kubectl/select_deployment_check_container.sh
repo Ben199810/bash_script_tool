@@ -1,14 +1,6 @@
 #!/bin/bash
 source ../modules/default.sh
-source ../modules/kubernetes_context_list.sh
-
-# 顯示當前 kubernetes 的 context
-CURRENT_CONTEXTS=$(kubectl config current-context)
-echo -e "${BLUE}Current Kubernetes contexts: $CURRENT_CONTEXTS${NC}"
-
-# 顯示當前 kubernetes 的 namespace
-CURRENT_NAMESPACE=$(kubectl config view --minify -o jsonpath='{..namespace}')
-echo -e "${BLUE}Current Kubernetes namespace: $CURRENT_NAMESPACE${NC}"
+source ../modules/switch_kubernetes_context.sh
 
 # 使用 fzf 選擇 deployment
 DEPLOYMENT_NAME=$(kubectl get deployment -o name | fzf)
