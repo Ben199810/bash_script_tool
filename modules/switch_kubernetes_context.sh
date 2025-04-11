@@ -1,3 +1,15 @@
+# 顯示當前 kubernetes 的 context
+function current_context() {
+  CURRENT_CONTEXT=$(kubectl config current-context)
+  echo -e "${BLUE}Current Kubernetes contexts: $CURRENT_CONTEXT${NC}"
+}
+
+# 顯示當前 kubernetes 的 namespace
+function current_namespace() {
+  CURRENT_NAMESPACE=$(kubectl config view --minify -o jsonpath='{..namespace}')
+  echo -e "${BLUE}Current Kubernetes namespace: $CURRENT_NAMESPACE${NC}"
+}
+
 # 切換至選擇的 Kubernetes Context
 function switch_context() {
   # 檢查用戶是否選擇了 Context
@@ -22,16 +34,23 @@ function switch_namespace() {
   fi
 }
 
-# 使用 fzf 選擇 Kubernetes Context 和 Namespace
-KUBE_CONTEXT=$(kubectl config get-contexts -o name | fzf --prompt="Select a context: ")
-switch_context
-KUBE_NAMESPACE=$(kubectl get namespaces -o name | fzf --prompt="Select a namespace: ")
-switch_namespace
+# 顯示當前 kubernetes 的 context & namespace
+current_context
+current_namespace
 
-# 顯示當前 kubernetes 的 context
-CURRENT_CONTEXT=$(kubectl config current-context)
-echo -e "${GREEN}Current Kubernetes contexts: $CURRENT_CONTEXT${NC}"
+# 是否要切換 Kubernetes Context
+read -p "Do you want to switch Kubernetes Context? (y/n): " SWITCH_CONTEXT
+if [[ "$SWITCH_CONTEXT" =~ ^[Yy]$ ]]; then
+  # 使用 fzf 選擇 Kubernetes Context
+  KUBE_CONTEXT=$(kubectl config get-contexts -o name | fzf --prompt="Select a context: ")
+  switch_context
+  # 使用 fzf 選擇 Kubernetes Namespace
+  KUBE_NAMESPACE=$(kubectl get namespaces -o name | fzf --prompt="Select a namespace: ")
+  switch_namespace
+else
+  echo -e "${YELLOW}Skipping context switch.${NC}"
+fi
 
-# 顯示當前 kubernetes 的 namespace
-CURRENT_NAMESPACE=$(kubectl config view --minify -o jsonpath='{..namespace}')
-echo -e "${GREEN}Current Kubernetes namespace: $CURRENT_NAMESPACE${NC}"
+# 顯示當前 kubernetes 的 context & namespace
+current_context
+current_namespace
