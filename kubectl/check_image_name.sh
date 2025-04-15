@@ -1,9 +1,11 @@
 #!/bin/bash
 source ../modules/default.sh
 source ../modules/switch_kubernetes_context.sh
+source ../modules/docker_operate.sh
 
 # images 空陣列儲存所有的 image 名稱
 images=()
+new_images=()
 
 # 檢查所有 deployments 內所有的 container 使用的 image 名稱
 # 如果有使用的 image 名稱開頭是 gcr.io 則顯示該 container 的資訊
@@ -25,3 +27,41 @@ for DEPLOYMENT in $DEPLOYMENTS; do
     fi
   done
 done
+
+# images 陣列不為空，篩選重複的 image 名稱
+if [ ${#images[@]} -gt 0 ]; then
+  echo -e "${BLUE}Images found: ${NC}"
+  # 使用 sort 和 uniq 來篩選重複的 image 名稱
+  unique_images=($(printf "%s\n" "${images[@]}" | sort -u))
+  for image in "${unique_images[@]}"; do
+    echo -e "${GREEN}$image${NC}"
+    # gcr.io 字串替換 asia-east1-docker.pkg.dev/gcp-20210526-001
+    new_image=$(echo "$image" | sed 's/gcr.io/asia-east1-docker.pkg.dev\/gcp-20210526-001/g')
+    new_images+=("$new_image")
+  done
+else
+  echo -e "${RED}No images found.${NC}"
+fi
+
+# 檢查 new_images 陣列是否有新的 image 名稱
+# if [ ${#new_images[@]} -gt 0 ]; then
+#   echo -e "${BLUE}New Images found: ${NC}"
+#   for new_image in "${new_images[@]}"; do
+#     echo -e "${GREEN}$new_image${NC}"
+#   done
+# else
+#   echo -e "${RED}No new images found.${NC}"
+# fi
+
+# docker pull
+docker_pull "${unique_images[@]}"
+
+# docker tag
+docker_tag unique_images[@] new_images[@]
+
+# docker push
+docker_push "${new_images[@]}"
+
+# docker rmi
+docker_rmi "${unique_images[@]}"
+docker_rmi "${new_images[@]}"
