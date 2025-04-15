@@ -15,10 +15,10 @@ if [ -z "$DEPLOYMENTS" ]; then
 fi
 
 for DEPLOYMENT in $DEPLOYMENTS; do
+  echo -e "${BLUE}Selected deployment: $DEPLOYMENT${NC}"
   CONTAINER_IMAGES=$(kubectl get deployment $DEPLOYMENT --context $CURRENT_CONTEXT -n $CURRENT_NAMESPACE -o jsonpath='{.spec.template.spec.containers[*].image}')
   for CONTAINER_IMAGE in $CONTAINER_IMAGES; do
     if [[ "$CONTAINER_IMAGE" == gcr.io/rd6-project/* ]]; then
-      echo -e "${BLUE}Selected deployment: $DEPLOYMENT${NC}"
       echo -e "${GREEN}Container Image: $CONTAINER_IMAGE${NC}"
       # 將 image 名稱加入 images 陣列
       images+=("$CONTAINER_IMAGE")
