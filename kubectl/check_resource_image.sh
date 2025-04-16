@@ -8,7 +8,6 @@ new_images=()
 
 # 檢查所有 resources 內所有的 container 使用的 image 名稱
 # 如果有使用的 image 名稱開頭是 gcr.io 則顯示該 container 的資訊
-
 options=("deployment" "statefulset" "daemonset" "cronjob" "exit")
 PS3="選擇 Kubernetes Resource: "
 select opt in "${options[@]}"; do
@@ -57,12 +56,8 @@ for RESOURCE in $RESOURCES; do
   CONTAINER_IMAGES=$(kubectl get ${option} $RESOURCE --context $CURRENT_CONTEXT -n $CURRENT_NAMESPACE -o jsonpath='{.spec.template.spec.containers[*].image}')
   fi
   for CONTAINER_IMAGE in $CONTAINER_IMAGES; do
-    # 檢查 image 名稱是否以 gcr.io/rd6-project 開頭
-    if [[ "$CONTAINER_IMAGE" == gcr.io/rd6-project/* ]]; then
-      echo -e "${GREEN}Container Image: $CONTAINER_IMAGE${NC}"
-      # 將 image 名稱加入 images 陣列
-      images+=("$CONTAINER_IMAGE")
-    fi
+    # 將 image 名稱加入 images 陣列
+    images+=("$CONTAINER_IMAGE")
   done
 done
 
@@ -73,27 +68,7 @@ if [ ${#images[@]} -gt 0 ]; then
   unique_images=($(printf "%s\n" "${images[@]}" | sort -u))
   for image in "${unique_images[@]}"; do
     echo -e "${GREEN}$image${NC}"
-    # gcr.io 字串替換 asia-east1-docker.pkg.dev/gcp-20210526-001
-    new_image=$(echo "$image" | sed 's/gcr.io/asia-east1-docker.pkg.dev\/gcp-20210526-001/g')
-    new_images+=("$new_image")
   done
 else
   echo -e "${RED}No images found.${NC}"
-fi
-
-read -p "Do you want check new images? (y/n): " answer
-
-if [[ "$answer" != "y" && "$answer" != "Y" ]]; then
-  echo -e "${RED}Exiting...${NC}"
-  exit 0
-else
-  # 檢查 new_images 陣列是否有新的 image 名稱
-  if [ ${#new_images[@]} -gt 0 ]; then
-    echo -e "${BLUE}New Images found: ${NC}"
-    for new_image in "${new_images[@]}"; do
-      echo -e "${GREEN}$new_image${NC}"
-    done
-  else
-    echo -e "${RED}No new images found.${NC}"
-  fi
 fi
