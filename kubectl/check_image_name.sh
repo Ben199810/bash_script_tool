@@ -7,18 +7,50 @@ source ../modules/docker_operate.sh
 images=()
 new_images=()
 
-# 檢查所有 deployments 內所有的 container 使用的 image 名稱
+# 檢查所有 resources 內所有的 container 使用的 image 名稱
 # 如果有使用的 image 名稱開頭是 gcr.io 則顯示該 container 的資訊
 
-DEPLOYMENTS=$(kubectl get deployment --context $CURRENT_CONTEXT -n $CURRENT_NAMESPACE -o jsonpath='{.items[*].metadata.name}')
-if [ -z "$DEPLOYMENTS" ]; then
-  echo -e "${RED}No deployments found.${NC}"
-  exit 1
-fi
+options=("deployment" "statefulset" "cronJob" "exit")
+PS3="選擇 Kubernetes Resource: "
+select opt in "${options[@]}"; do
+  case $opt in
+    "deployment")
+      echo -e "${BLUE}You chose to check Deployment.${NC}"
+      RESOURCES=$(kubectl get deployment --context $CURRENT_CONTEXT -n $CURRENT_NAMESPACE -o jsonpath='{.items[*].metadata.name}')
+      option=${opt}
+      break
+      ;;
+    "statefulset")
+      echo -e "${BLUE}You chose to check StatefulSet.${NC}"
+      RESOURCES=$(kubectl get statefulset --context $CURRENT_CONTEXT -n $CURRENT_NAMESPACE -o jsonpath='{.items[*].metadata.name}')
+      option=${opt}
+      break
+      ;;
+    "cronJob")
+      echo -e "${BLUE}You chose to check CronJob.${NC}"
+      RESOURCES=$(kubectl get cronjob --context $CURRENT_CONTEXT -n $CURRENT_NAMESPACE -o jsonpath='{.items[*].metadata.name}')
+      option=${opt}
+      break
+      ;;
+    "exit")
+      echo -e "${RED}Exiting...${NC}"
+      exit 0
+      ;;
+    *)
+      echo -e "${RED}Invalid option. Please try again.${NC}"
+      exit 1
+      ;;
+  esac
+done
 
-for DEPLOYMENT in $DEPLOYMENTS; do
-  echo -e "${BLUE}Selected deployment: $DEPLOYMENT${NC}"
-  CONTAINER_IMAGES=$(kubectl get deployment $DEPLOYMENT --context $CURRENT_CONTEXT -n $CURRENT_NAMESPACE -o jsonpath='{.spec.template.spec.containers[*].image}')
+for RESOURCE in $RESOURCES; do
+  echo -e "${BLUE}Selected ${option}: $RESOURCE${NC}"
+  if [[ "$option" == "cronJob" ]]; then
+    # cronJob 需要使用 jsonpath 來取得 spec.jobTemplate.spec.template.spec.containers.image
+    CONTAINER_IMAGES=$(kubectl get ${option} $RESOURCE --context $CURRENT_CONTEXT -n $CURRENT_NAMESPACE -o jsonpath='{.spec.jobTemplate.spec.template.spec.containers[*].image}')
+  else
+  CONTAINER_IMAGES=$(kubectl get ${option} $RESOURCE --context $CURRENT_CONTEXT -n $CURRENT_NAMESPACE -o jsonpath='{.spec.template.spec.containers[*].image}')
+  fi
   for CONTAINER_IMAGE in $CONTAINER_IMAGES; do
     if [[ "$CONTAINER_IMAGE" == gcr.io/rd6-project/* ]]; then
       echo -e "${GREEN}Container Image: $CONTAINER_IMAGE${NC}"
@@ -43,25 +75,32 @@ else
   echo -e "${RED}No images found.${NC}"
 fi
 
-# 檢查 new_images 陣列是否有新的 image 名稱
-# if [ ${#new_images[@]} -gt 0 ]; then
-#   echo -e "${BLUE}New Images found: ${NC}"
-#   for new_image in "${new_images[@]}"; do
-#     echo -e "${GREEN}$new_image${NC}"
-#   done
-# else
-#   echo -e "${RED}No new images found.${NC}"
-# fi
+read -p "Do you want check new images? (y/n): " answer
 
-# docker pull
-docker_pull "${unique_images[@]}"
+if [[ "$answer" != "y" && "$answer" != "Y" ]]; then
+  echo -e "${RED}Exiting...${NC}"
+  exit 0
+else
+  # 檢查 new_images 陣列是否有新的 image 名稱
+  if [ ${#new_images[@]} -gt 0 ]; then
+    echo -e "${BLUE}New Images found: ${NC}"
+    for new_image in "${new_images[@]}"; do
+      echo -e "${GREEN}$new_image${NC}"
+    done
+  else
+    echo -e "${RED}No new images found.${NC}"
+  fi
+fi
 
-# docker tag
-docker_tag unique_images[@] new_images[@]
+# # docker pull
+# docker_pull "${unique_images[@]}"
 
-# docker push
-docker_push "${new_images[@]}"
+# # docker tag
+# docker_tag unique_images[@] new_images[@]
 
-# docker rmi
-docker_rmi "${unique_images[@]}"
-docker_rmi "${new_images[@]}"
+# # docker push
+# docker_push "${new_images[@]}"
+
+# # docker rmi
+# docker_rmi "${unique_images[@]}"
+# docker_rmi "${new_images[@]}"
