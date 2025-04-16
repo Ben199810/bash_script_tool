@@ -10,7 +10,7 @@ new_images=()
 # 檢查所有 resources 內所有的 container 使用的 image 名稱
 # 如果有使用的 image 名稱開頭是 gcr.io 則顯示該 container 的資訊
 
-options=("deployment" "statefulset" "cronJob" "exit")
+options=("deployment" "statefulset" "daemonset" "cronjob" "exit")
 PS3="選擇 Kubernetes Resource: "
 select opt in "${options[@]}"; do
   case $opt in
@@ -26,7 +26,13 @@ select opt in "${options[@]}"; do
       option=${opt}
       break
       ;;
-    "cronJob")
+    "daemonset")
+      echo -e "${BLUE}You chose to check DaemonSet.${NC}"
+      RESOURCES=$(kubectl get daemonset --context $CURRENT_CONTEXT -n $CURRENT_NAMESPACE -o jsonpath='{.items[*].metadata.name}')
+      option=${opt}
+      break
+      ;;
+    "cronjob")
       echo -e "${BLUE}You chose to check CronJob.${NC}"
       RESOURCES=$(kubectl get cronjob --context $CURRENT_CONTEXT -n $CURRENT_NAMESPACE -o jsonpath='{.items[*].metadata.name}')
       option=${opt}
