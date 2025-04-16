@@ -57,6 +57,7 @@ for RESOURCE in $RESOURCES; do
   CONTAINER_IMAGES=$(kubectl get ${option} $RESOURCE --context $CURRENT_CONTEXT -n $CURRENT_NAMESPACE -o jsonpath='{.spec.template.spec.containers[*].image}')
   fi
   for CONTAINER_IMAGE in $CONTAINER_IMAGES; do
+    # 檢查 image 名稱是否以 gcr.io/rd6-project 開頭
     if [[ "$CONTAINER_IMAGE" == gcr.io/rd6-project/* ]]; then
       echo -e "${GREEN}Container Image: $CONTAINER_IMAGE${NC}"
       # 將 image 名稱加入 images 陣列
