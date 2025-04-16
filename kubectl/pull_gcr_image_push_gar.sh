@@ -40,8 +40,8 @@ else
 fi
 
 # docker operations
-docker_pull "${gcr_images[@]}"
-docker_tag gcr_images[@] new_gar_images[@]
+docker_pull "${unique_gcr_images[@]}"
+docker_tag unique_gcr_images[@] new_gar_images[@]
 docker_push "${new_gar_images[@]}"
-docker_rmi "${gcr_images[@]}"
+docker_rmi "${unique_gcr_images[@]}"
 docker_rmi "${new_gar_images[@]}"
