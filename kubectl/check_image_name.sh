@@ -1,7 +1,6 @@
 #!/bin/bash
 source ../modules/default.sh
 source ../modules/switch_kubernetes_context.sh
-source ../modules/docker_operate.sh
 
 # images 空陣列儲存所有的 image 名稱
 images=()
@@ -97,16 +96,3 @@ else
     echo -e "${RED}No new images found.${NC}"
   fi
 fi
-
-# # docker pull
-# docker_pull "${unique_images[@]}"
-
-# # docker tag
-# docker_tag unique_images[@] new_images[@]
-
-# # docker push
-# docker_push "${new_images[@]}"
-
-# # docker rmi
-# docker_rmi "${unique_images[@]}"
-# docker_rmi "${new_images[@]}"
