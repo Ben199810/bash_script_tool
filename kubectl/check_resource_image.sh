@@ -4,37 +4,29 @@ source ../modules/switch_kubernetes_context.sh
 
 # images 空陣列儲存所有的 image 名稱
 images=()
-new_images=()
 
 # 檢查所有 resources 內所有的 container 使用的 image 名稱
-# 如果有使用的 image 名稱開頭是 gcr.io 則顯示該 container 的資訊
 options=("deployment" "statefulset" "daemonset" "cronjob" "exit")
 PS3="選擇 Kubernetes Resource: "
+# all namespace resources
+read -p "check all namespace resources? (y/n): " check_all_namespace
 select opt in "${options[@]}"; do
   case $opt in
     "deployment")
       echo -e "${BLUE}You chose to check Deployment.${NC}"
-      RESOURCES=$(kubectl get deployment --context $CURRENT_CONTEXT -n $CURRENT_NAMESPACE -o jsonpath='{.items[*].metadata.name}')
       option=${opt}
-      break
       ;;
     "statefulset")
       echo -e "${BLUE}You chose to check StatefulSet.${NC}"
-      RESOURCES=$(kubectl get statefulset --context $CURRENT_CONTEXT -n $CURRENT_NAMESPACE -o jsonpath='{.items[*].metadata.name}')
       option=${opt}
-      break
       ;;
     "daemonset")
       echo -e "${BLUE}You chose to check DaemonSet.${NC}"
-      RESOURCES=$(kubectl get daemonset --context $CURRENT_CONTEXT -n $CURRENT_NAMESPACE -o jsonpath='{.items[*].metadata.name}')
       option=${opt}
-      break
       ;;
     "cronjob")
       echo -e "${BLUE}You chose to check CronJob.${NC}"
-      RESOURCES=$(kubectl get cronjob --context $CURRENT_CONTEXT -n $CURRENT_NAMESPACE -o jsonpath='{.items[*].metadata.name}')
       option=${opt}
-      break
       ;;
     "exit")
       echo -e "${RED}Exiting...${NC}"
@@ -45,18 +37,41 @@ select opt in "${options[@]}"; do
       exit 1
       ;;
   esac
+  if [[ "$check_all_namespace" == "y" ]]; then
+    RESOURCES_AND_NAMESPACES=$(kubectl get $option --context $CURRENT_CONTEXT -A -o jsonpath='{range .items[*]}{.metadata.name} {.metadata.namespace}{"\n"}{end}')
+    RESOURCES=($(echo "$RESOURCES_AND_NAMESPACES" | awk '{print $1}'))
+    NAMESPACES=($(echo "$RESOURCES_AND_NAMESPACES" | awk '{print $2}'))
+  else
+    RESOURCES=$(kubectl get $option --context $CURRENT_CONTEXT -n $CURRENT_NAMESPACE -o jsonpath='{.items[*].metadata.name}')
+    RESOURCES=($RESOURCES)
+  fi
+  break
 done
 
-for RESOURCE in $RESOURCES; do
-  echo -e "${BLUE}Selected ${option}: $RESOURCE${NC}"
-  if [[ "$option" == "cronJob" ]]; then
+for i in "${!RESOURCES[@]}"; do
+  # 將資源名稱和命名空間組合成一個字串
+  if [[ "$check_all_namespace" == "y" ]]; then
+    RESOURCE="${RESOURCES[$i]}"
+    NAMESPACE="${NAMESPACES[$i]}"
+    echo -e "${BLUE}Selected ${option}: $RESOURCE in namespace: $NAMESPACE${NC}"
     # cronJob 需要使用 jsonpath 來取得 spec.jobTemplate.spec.template.spec.containers.image
-    CONTAINER_IMAGES=$(kubectl get ${option} $RESOURCE --context $CURRENT_CONTEXT -n $CURRENT_NAMESPACE -o jsonpath='{.spec.jobTemplate.spec.template.spec.containers[*].image}')
+    if [[ "$option" == "cronJob" ]]; then
+      CONTAINER_IMAGES=$(kubectl get ${option} $RESOURCE --context $CURRENT_CONTEXT -n $NAMESPACE -o jsonpath='{.spec.jobTemplate.spec.template.spec.containers[*].image}')
+    else
+      CONTAINER_IMAGES=$(kubectl get ${option} $RESOURCE --context $CURRENT_CONTEXT -n $NAMESPACE -o jsonpath='{.spec.template.spec.containers[*].image}')
+    fi
   else
-  CONTAINER_IMAGES=$(kubectl get ${option} $RESOURCE --context $CURRENT_CONTEXT -n $CURRENT_NAMESPACE -o jsonpath='{.spec.template.spec.containers[*].image}')
+    RESOURCE="${RESOURCES[$i]}"
+    echo -e "${BLUE}Selected ${option}: $RESOURCE${NC}"
+    # cronJob 需要使用 jsonpath 來取得 spec.jobTemplate.spec.template.spec.containers.image
+    if [[ "$option" == "cronJob" ]]; then
+      CONTAINER_IMAGES=$(kubectl get ${option} $RESOURCE --context $CURRENT_CONTEXT -n $CURRENT_NAMESPACE -o jsonpath='{.spec.jobTemplate.spec.template.spec.containers[*].image}')
+    else
+      CONTAINER_IMAGES=$(kubectl get ${option} $RESOURCE --context $CURRENT_CONTEXT -n $CURRENT_NAMESPACE -o jsonpath='{.spec.template.spec.containers[*].image}')
+    fi
   fi
+  # 將 image 名稱加入 images 陣列
   for CONTAINER_IMAGE in $CONTAINER_IMAGES; do
-    # 將 image 名稱加入 images 陣列
     images+=("$CONTAINER_IMAGE")
   done
 done
