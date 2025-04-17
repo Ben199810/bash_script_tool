@@ -2,19 +2,10 @@
 source ../kubectl/check_resource_image.sh
 
 gcr_images=()
-repo_path=(
-  /Users/bing-wei/Documents/swissknife/SRE/pid-cluster-yaml/bbgp/outside
-  /Users/bing-wei/Documents/swissknife/SRE/pid-cluster-yaml/bbin/outside
-  /Users/bing-wei/Documents/swissknife/SRE/images-build/PI
-  /Users/bing-wei/Documents/swissknife/SRE/images-build/base
-  /Users/bing-wei/Documents/swissknife/SRE/images-build/inf
-  /Users/bing-wei/Documents/swissknife/SRE/images-build/proxy-server
-  /Users/bing-wei/Documents/swissknife/SRE/images-build/cicd
-)
-# read -p "請輸入要搜尋的 image 關鍵字: " keyword
-keyword="gcr.io/rd6-project"
+repo_path=()
 
-# images 陣列中過濾開頭為 gcr.io/rd6-project 的 image 名稱
+read -p "請輸入要搜尋的 image 關鍵字: " keyword
+
 if [[ ${#images[@]} -gt 0 ]]; then
   for i in "${!images[@]}"; do
     if [[ "${images[$i]}" == ${keyword}* ]]; then
