@@ -9,7 +9,6 @@ if [ "$user_input" == "y" ]; then
   switch_gcp_project
 elif [ "$user_input" == "n" ]; then
   echo "Exiting."
-  exit 0
 else
   echo "Invalid input. Exiting."
   exit 1
