@@ -1,7 +1,5 @@
 #!/bin/bash
-
-source ../modules/default.sh
-source ../modules/switch_kubernetes_context.sh
+source ../kubectl/switch_kubernetes_context.sh.sh
 
 # 檢查 HPA 的 API 版本是否是 autoscaling/v2beta2
 function check_hpa_apiversion() {

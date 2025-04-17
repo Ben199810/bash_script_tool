@@ -1,3 +1,8 @@
+current_gcp_project() {
+  CURRENT_PROJECT=$(gcloud config get-value project)
+  echo -e "${BLUE}Current GCP project: $CURRENT_PROJECT${NC}"
+}
+
 switch_gcp_project() {
   # 列出所有的 GCP 項目
   projects=$(gcloud projects list --format="value(projectId)")
@@ -21,18 +26,3 @@ switch_gcp_project() {
     exit 1
   fi
 }
-
-# 顯示當前的 GCP 項目
-current_project=$(gcloud config get-value project)
-echo -e "${BLUE}Current GCP project: $current_project${NC}"
-
-read -p "Do you want to switch GCP project? (y/n): " user_input
-
-if [ "$user_input" == "y" ]; then
-  switch_gcp_project
-elif [ "$user_input" == "n" ]; then
-  echo "Exiting."
-else
-  echo "Invalid input. Exiting."
-  exit 1
-fi

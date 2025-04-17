@@ -1,6 +1,5 @@
 #!/bin/bash
-source ../modules/default.sh
-source ../modules/switch_kubernetes_context.sh
+source ../kubectl/switch_kubernetes_context.sh.sh
 
 # 列出 deployments 內的所有 container
 # 如果有 container 名稱是 php-exporter，則顯示該 container 的資訊、deployment 的 annotations
