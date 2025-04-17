@@ -1,6 +1,5 @@
 #!/bin/bash
-source ../modules/default.sh
-source ../modules/switch_kubernetes_context.sh
+source ../kubectl/switch_kubernetes_context.sh.sh
 
 # images 空陣列儲存所有的 image 名稱
 images=()

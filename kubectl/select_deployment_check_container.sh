@@ -1,6 +1,5 @@
 #!/bin/bash
-source ../modules/default.sh
-source ../modules/switch_kubernetes_context.sh
+source ../kubectl/switch_kubernetes_context.sh.sh
 
 # 使用 fzf 選擇 deployment
 DEPLOYMENT_NAME=$(kubectl get deployment -o name | fzf)

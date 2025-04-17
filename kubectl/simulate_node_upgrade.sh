@@ -1,6 +1,5 @@
 #!/bin/bash
-source ../modules/default.sh
-source ../modules/switch_kubernetes_context.sh
+source ../kubectl/switch_kubernetes_context.sh.sh
 
 # 這個腳本會模擬 Kubernetes 節點的升級過程
 kubectl get nodes -o 'custom-columns=NAME:.metadata.name,STATUS:.status.conditions[-1].type,AGE:.metadata.creationTimestamp,VERSION:.status.nodeInfo.kubeletVersion'
