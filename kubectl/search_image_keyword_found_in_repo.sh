@@ -1,6 +1,5 @@
 #!/bin/bash
 source ../kubectl/check_resource_image.sh
-source ../modules/docker_operate.sh
 
 gcr_images=()
 repo_path=(
@@ -52,13 +51,16 @@ fi
 for path in "${repo_path[@]}"; do
   find "$path" -type f \( -name "*.yaml" -o -name "*.yml" \) | while read -r file; do
     # 檢查檔案中是否包含 gcr_image_names 的 image 名稱
+    echo -e "${BLUE}檔案: $file${NC}"
     for image_name in "${gcr_image_names[@]}"; do
       if grep -q "$image_name" "$file"; then
         # 列印出檔案名稱和行號
         echo -e "${BLUE}檔案: $file${NC}"
-        echo -e "${GREEN}行號: $(grep -n "$image_name" "$file" | cut -d ':' -f 1)${NC}"
+        echo -e "${YELLOW}行號: $(grep -n "$image_name" "$file" | cut -d ':' -f 1)${NC}"
         # 列印出檔案內容
-        echo -e "${GREEN}內容: $(grep "$image_name" "$file")${NC}"
+        echo -e "${YELLOW}內容: $(grep "$image_name" "$file")${NC}"
+      else
+        echo -e "${GREEN}無找到 "$image_name" 相關的內容${NC}"
       fi
     done
   done
