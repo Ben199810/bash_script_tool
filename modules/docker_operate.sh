@@ -22,7 +22,7 @@ docker_tag() {
   for i in "${!images[@]}"; do
     local image="${images[$i]}"
     local new_image="${new_images[$i]}"
-    echo -e "${BLUE}Tagging image: $image -> $new_image${NC}"
+    echo -e "${YELLOW}Tagging image: $image -> $new_image${NC}"
     docker tag "$image" "$new_image"
   done
 }
