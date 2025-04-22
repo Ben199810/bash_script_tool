@@ -61,6 +61,13 @@ function get_pdb() {
   kubectl get pdb --context="$CURRENT_CONTEXT" -n "$CURRENT_NAMESPACE" -o 'custom-columns=NAME:.metadata.name,STATUS:.status.conditions[-1].type,AGE:.metadata.creationTimestamp'
 }
 
+function get_all_pdb() {
+  local CURRENT_CONTEXT="$1"
+
+  echo -e "${BLUE}Listing all pod disruption budgets in context: $CURRENT_CONTEXT${NC}"
+  kubectl get pdb --context="$CURRENT_CONTEXT" -A -o 'custom-columns=NAME:.metadata.name,STATUS:.status.conditions[-1].type,AGE:.metadata.creationTimestamp'
+}
+
 function describe_pdb() {
   local CURRENT_CONTEXT="$1"
   local CURRENT_NAMESPACE="$2"
