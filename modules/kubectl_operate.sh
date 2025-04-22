@@ -9,6 +9,7 @@ function current_namespace() {
 }
 
 function switch_context() {
+  KUBE_CONTEXT=$1
   if [ -n "$KUBE_CONTEXT" ]; then
     kubectl config use-context "$KUBE_CONTEXT"
   else
@@ -18,6 +19,7 @@ function switch_context() {
 }
 
 function switch_namespace() {
+  KUBE_NAMESPACE=$1
   if [ -n "$KUBE_NAMESPACE" ]; then
     # 去除前綴 "namespace/"
     KUBE_NAMESPACE=${KUBE_NAMESPACE#namespace/}
@@ -29,32 +31,50 @@ function switch_namespace() {
 }
 
 function get_deployment() {
-  local current_context="$1"
-  local current_namespace="$2"
+  local CURRENT_CONTEXT="$1"
+  local CURRENT_NAMESPACE="$2"
 
-  echo -e "${BLUE}Listing deployments in context: $current_context, namespace: $current_namespace${NC}"
-  kubectl get deployment --context="$current_context" -n "$current_namespace" -o 'custom-columns=NAME:.metadata.name,STATUS:.status.conditions[-1].type,AGE:.metadata.creationTimestamp'
+  echo -e "${BLUE}Listing deployments in context: $CURRENT_CONTEXT, namespace: $CURRENT_NAMESPACE${NC}"
+  kubectl get deployment --context="$CURRENT_CONTEXT" -n "$CURRENT_NAMESPACE" -o 'custom-columns=NAME:.metadata.name,STATUS:.status.conditions[-1].type,AGE:.metadata.creationTimestamp'
 }
 
 function get_ingress() {
-  local current_context="$1"
-  local current_namespace="$2"
+  local CURRENT_CONTEXT="$1"
+  local CURRENT_NAMESPACE="$2"
 
-  echo -e "${BLUE}Listing ingress in context: $current_context, namespace: $current_namespace${NC}"
-  kubectl get ingress --context="$current_context" -n "$current_namespace" -o 'custom-columns=NAME:.metadata.name,HOSTS:.spec.rules[*].host,ADDRESS:.status.loadBalancer.ingress[*].ip'
+  echo -e "${BLUE}Listing ingress in context: $CURRENT_CONTEXT, namespace: $CURRENT_NAMESPACE${NC}"
+  kubectl get ingress --context="$CURRENT_CONTEXT" -n "$CURRENT_NAMESPACE" -o 'custom-columns=NAME:.metadata.name,HOSTS:.spec.rules[*].host,ADDRESS:.status.loadBalancer.ingress[*].ip'
 }
 
 function get_namespace() {
-  local current_context="$1"
+  local CURRENT_CONTEXT="$1"
 
-  echo -e "${BLUE}Listing namespaces in context: $current_context${NC}"
-  kubectl get namespace --context="$current_context" -o 'custom-columns=NAME:.metadata.name,STATUS:.status.phase'
+  echo -e "${BLUE}Listing namespaces in context: $CURRENT_CONTEXT${NC}"
+  kubectl get namespace --context="$CURRENT_CONTEXT" -o 'custom-columns=NAME:.metadata.name,STATUS:.status.phase'
+}
+
+function get_pdb() {
+  local CURRENT_CONTEXT="$1"
+  local CURRENT_NAMESPACE="$2"
+
+  echo -e "${BLUE}Listing pod disruption budgets in context: $CURRENT_CONTEXT, namespace: $CURRENT_NAMESPACE${NC}"
+  kubectl get pdb --context="$CURRENT_CONTEXT" -n "$CURRENT_NAMESPACE" -o 'custom-columns=NAME:.metadata.name,STATUS:.status.conditions[-1].type,AGE:.metadata.creationTimestamp'
+}
+
+function describe_pdb() {
+  local CURRENT_CONTEXT="$1"
+  local CURRENT_NAMESPACE="$2"
+  # fzf
+  local PDB_NAME=$(kubectl get pdb --context="$CURRENT_CONTEXT" -n "$CURRENT_NAMESPACE" -o 'custom-columns=NAME:.metadata.name' | fzf --height 40% --reverse --inline-info --header="Select a Pod Disruption Budget to describe")
+
+  echo -e "${BLUE}Describing Pod Disruption Budget: $PDB_NAME in context: $CURRENT_CONTEXT, namespace: $CURRENT_NAMESPACE${NC}"
+  kubectl describe pdb "$PDB_NAME" --context="$CURRENT_CONTEXT" -n "$CURRENT_NAMESPACE"
 }
 
 function delete_namespace() {
-  local current_context="$1"
-  local current_namespace="$2"
+  local CURRENT_CONTEXT="$1"
+  local CURRENT_NAMESPACE="$2"
 
-  echo -e "${BLUE}Deleting namespace: $current_namespace in context: $current_context${NC}"
-  kubectl delete namespace "$current_namespace" --context="$current_context"
+  echo -e "${BLUE}Deleting namespace: $CURRENT_NAMESPACE in context: $CURRENT_CONTEXT${NC}"
+  kubectl delete namespace "$CURRENT_NAMESPACE" --context="$CURRENT_CONTEXT"
 }
