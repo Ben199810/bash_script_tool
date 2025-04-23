@@ -61,6 +61,20 @@ function get_pdb() {
   kubectl get pdb --context="$CURRENT_CONTEXT" -n "$CURRENT_NAMESPACE" -o 'custom-columns=NAME:.metadata.name,STATUS:.status.conditions[-1].type,AGE:.metadata.creationTimestamp'
 }
 
+get_pod() {
+  local ASSIGNATION_CONTEXT="$1"
+  local ASSIGNATION_NAMESPACE="$2"
+
+  if [[ -n "$ASSIGNATION_CONTEXT" ]]; then
+    CURRENT_CONTEXT=$ASSIGNATION_CONTEXT
+  fi
+  if [[ -n "$ASSIGNATION_NAMESPACE" ]]; then
+    CURRENT_NAMESPACE=$ASSIGNATION_NAMESPACE
+  fi
+  echo -e "${BLUE}Listing pods in context: $CURRENT_CONTEXT, namespace: $CURRENT_NAMESPACE${NC}"
+  kubectl get pod --context="$CURRENT_CONTEXT" -n "$CURRENT_NAMESPACE" -o 'custom-columns=NAME:.metadata.name,STATUS:.status.phase,AGE:.metadata.creationTimestamp'
+}
+
 function get_all_pdb() {
   local CURRENT_CONTEXT="$1"
 

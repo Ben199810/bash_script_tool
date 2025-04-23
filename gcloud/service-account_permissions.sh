@@ -1,8 +1,7 @@
 #!/bin/bash
-# 查看服務帳戶的權限
+source ../gcloud/switch_project.sh
 
-source ../modules/default.sh
-source ../modules/switch_gcp_project_enabled.sh
+# 查看服務帳戶的權限
 
 # 顯示目前的 GCP 專案
 current_project=$(gcloud config get-value project)
