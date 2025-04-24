@@ -30,6 +30,18 @@ function switch_namespace() {
   fi
 }
 
+function assign_context_and_namespace() {
+  local ASSIGNATION_CONTEXT="$1"
+  local ASSIGNATION_NAMESPACE="$2"
+
+  if [[ -n "$ASSIGNATION_CONTEXT" ]]; then
+    CURRENT_CONTEXT=$ASSIGNATION_CONTEXT
+  fi
+  if [[ -n "$ASSIGNATION_NAMESPACE" ]]; then
+    CURRENT_NAMESPACE=$ASSIGNATION_NAMESPACE
+  fi
+}
+
 function get_deployment() {
   local CURRENT_CONTEXT="$1"
   local CURRENT_NAMESPACE="$2"
@@ -65,14 +77,20 @@ get_pod() {
   local ASSIGNATION_CONTEXT="$1"
   local ASSIGNATION_NAMESPACE="$2"
 
-  if [[ -n "$ASSIGNATION_CONTEXT" ]]; then
-    CURRENT_CONTEXT=$ASSIGNATION_CONTEXT
-  fi
-  if [[ -n "$ASSIGNATION_NAMESPACE" ]]; then
-    CURRENT_NAMESPACE=$ASSIGNATION_NAMESPACE
-  fi
+  assign_context_and_namespace "$ASSIGNATION_CONTEXT" "$ASSIGNATION_NAMESPACE"
+
   echo -e "${BLUE}Listing pods in context: $CURRENT_CONTEXT, namespace: $CURRENT_NAMESPACE${NC}"
   kubectl get pod --context="$CURRENT_CONTEXT" -n "$CURRENT_NAMESPACE" -o 'custom-columns=NAME:.metadata.name,STATUS:.status.phase,AGE:.metadata.creationTimestamp'
+}
+
+get_service() {
+  local ASSIGNATION_CONTEXT="$1"
+  local ASSIGNATION_NAMESPACE="$2"
+
+  assign_context_and_namespace "$ASSIGNATION_CONTEXT" "$ASSIGNATION_NAMESPACE"
+
+  echo -e "${BLUE}Listing services in context: $CURRENT_CONTEXT, namespace: $CURRENT_NAMESPACE${NC}"
+  kubectl get service --context="$CURRENT_CONTEXT" -n "$CURRENT_NAMESPACE" -o 'custom-columns=NAME:.metadata.name,TYPE:.spec.type,CLUSTER-IP:.spec.clusterIP,EXTERNAL-IP:.status.loadBalancer.ingress[*].ip'
 }
 
 function get_all_pdb() {
