@@ -40,8 +40,10 @@ select opt in "${options[@]}"; do
     RESOURCES_AND_NAMESPACES=$(kubectl get $option --context $CURRENT_CONTEXT -A -o jsonpath='{range .items[*]}{.metadata.name} {.metadata.namespace}{"\n"}{end}')
     RESOURCES=($(echo "$RESOURCES_AND_NAMESPACES" | awk '{print $1}'))
     NAMESPACES=($(echo "$RESOURCES_AND_NAMESPACES" | awk '{print $2}'))
-  else
-    RESOURCES=$(kubectl get $option --context $CURRENT_CONTEXT -n $CURRENT_NAMESPACE -o jsonpath='{.items[*].metadata.name}')
+  else 
+    # RESOURCES=$(kubectl get $option --context $CURRENT_CONTEXT -n $CURRENT_NAMESPACE -o jsonpath='{.items[*].metadata.name}')
+    # RESOURCES 篩選出與 shark-* statefulset 有關的資源
+    RESOURCES=$(kubectl get $option --context $CURRENT_CONTEXT -o jsonpath='{range .items[*]}{.metadata.name}{"\n"}{end}' | grep '^shark-')
     RESOURCES=($RESOURCES)
   fi
   break
@@ -67,6 +69,7 @@ for i in "${!RESOURCES[@]}"; do
       CONTAINER_IMAGES=$(kubectl get ${option} $RESOURCE --context $CURRENT_CONTEXT -n $CURRENT_NAMESPACE -o jsonpath='{.spec.jobTemplate.spec.template.spec.containers[*].image}')
     else
       CONTAINER_IMAGES=$(kubectl get ${option} $RESOURCE --context $CURRENT_CONTEXT -n $CURRENT_NAMESPACE -o jsonpath='{.spec.template.spec.containers[*].image}')
+      echo -e "Images: $CONTAINER_IMAGES"
     fi
   fi
   # 將 image 名稱加入 images 陣列
@@ -77,12 +80,24 @@ done
 
 # images 陣列不為空，篩選重複的 image 名稱
 if [ ${#images[@]} -gt 0 ]; then
-  echo -e "${BLUE}Images found: ${NC}"
+  # echo -e "${BLUE}Images found: ${NC}"
   # 使用 sort 和 uniq 來篩選重複的 image 名稱
   unique_images=($(printf "%s\n" "${images[@]}" | sort -u))
-  for image in "${unique_images[@]}"; do
-    echo -e "${GREEN}$image${NC}"
-  done
+  # for image in "${unique_images[@]}"; do
+  #   echo -e "${GREEN}$image${NC}"
+  # done
+  # 過濾跟 php & fluent 相關的 image
+  unique_images=($(printf "%s\n" "${unique_images[@]}" | grep -v "php" | grep -v "fluent"))
 else
   echo -e "${RED}No images found.${NC}"
 fi
+
+# # 如果 unique_images 沒有符合 prod-fe50e426 或 prod-latest 的 tag
+# # 則顯示錯誤訊息
+# for image in "${unique_images[@]}"; do
+#   if [[ "$image" == *"prod-fe50e426"* || "$image" == *"prod-latest"* ]]; then
+#     echo -e "${GREEN}Found prod-fe50e426 or prod-latest tag: $image${NC}"
+#   else
+#     echo -e "${RED}No prod-fe50e426 or prod-latest tag found in image: $image${NC}"
+#   fi
+# done
