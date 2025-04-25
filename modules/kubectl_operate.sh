@@ -110,6 +110,18 @@ function describe_pdb() {
   kubectl describe pdb "$PDB_NAME" --context="$CURRENT_CONTEXT" -n "$CURRENT_NAMESPACE"
 }
 
+function describe_backendConfig() {
+  local ASSIGNATION_CONTEXT="$1"
+  local ASSIGNATION_NAMESPACE="$2"
+
+  assign_context_and_namespace "$ASSIGNATION_CONTEXT" "$ASSIGNATION_NAMESPACE"
+  # fzf
+  local BACKEND_CONFIG_NAME=$(kubectl get backendconfig --context="$CURRENT_CONTEXT" -n "$CURRENT_NAMESPACE" -o 'custom-columns=NAME:.metadata.name' | fzf --height 40% --reverse --inline-info --header="Select a BackendConfig to describe")
+
+  echo -e "${BLUE}Describing BackendConfig: $BACKEND_CONFIG_NAME in context: $CURRENT_CONTEXT, namespace: $CURRENT_NAMESPACE${NC}"
+  kubectl describe backendconfig "$BACKEND_CONFIG_NAME" --context="$CURRENT_CONTEXT" -n "$CURRENT_NAMESPACE"
+}
+
 function delete_namespace() {
   local CURRENT_CONTEXT="$1"
   local CURRENT_NAMESPACE="$2"
