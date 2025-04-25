@@ -26,3 +26,20 @@ helm_get_manifest(){
 
   helm get manifest $RELEASE_NAME --kube-context $CURRENT_CONTEXT --namespace $CURRENT_NAMESPACE
 }
+
+helm_get_values(){
+  local RELEASE_NAME="$1"
+  local RELEASE_NAMES=("$2")
+
+  # 選擇RELEASE_NAME From RELEASE_NAMES
+  if [ -z "$RELEASE_NAME" ]; then
+    RELEASE_NAMES=($(helm list --kube-context $CURRENT_CONTEXT --namespace $CURRENT_NAMESPACE -o json | jq -r '.[].name'))
+    if [ ${#RELEASE_NAMES[@]} -eq 0 ]; then
+      echo "No releases found in the current namespace."
+      exit 1
+    fi
+    RELEASE_NAME=$(printf '%s\n' "${RELEASE_NAMES[@]}" | fzf)
+  fi
+
+  helm get values $RELEASE_NAME --kube-context $CURRENT_CONTEXT --namespace $CURRENT_NAMESPACE
+}
