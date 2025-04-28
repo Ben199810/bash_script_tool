@@ -1,12 +1,6 @@
 #!/bin/bash
 source ../gcloud/switch_project.sh
 
-# 查看服務帳戶的權限
-
-# 顯示目前的 GCP 專案
-current_project=$(gcloud config get-value project)
-echo -e "${BLUE}Current GCP Project: $current_project${NC}"
-
 # 列出所有 service accounts 並使用 fzf 選擇
 service_account=$(gcloud iam service-accounts list --format="value(email)" | fzf)
 if [ -z "$service_account" ]; then
