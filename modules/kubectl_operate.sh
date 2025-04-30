@@ -76,11 +76,14 @@ function get_pdb() {
 get_pod() {
   local ASSIGNATION_CONTEXT="$1"
   local ASSIGNATION_NAMESPACE="$2"
+  local SEARCH_KEYWORD="$3"
 
   assign_context_and_namespace "$ASSIGNATION_CONTEXT" "$ASSIGNATION_NAMESPACE"
 
   echo -e "${BLUE}Listing pods in context: $CURRENT_CONTEXT, namespace: $CURRENT_NAMESPACE${NC}"
   kubectl get pod --context="$CURRENT_CONTEXT" -n "$CURRENT_NAMESPACE" -o 'custom-columns=NAME:.metadata.name,STATUS:.status.phase,AGE:.metadata.creationTimestamp'
+
+  kubectl get pod --context="$CURRENT_CONTEXT" -n "$CURRENT_NAMESPACE" -o 'custom-columns=NAME:.metadata.name,STATUS:.status.phase,AGE:.metadata.creationTimestamp' | grep "$SEARCH_KEYWORD" | awk '{print $1}' | xargs -r kubectl describe pod --context="$CURRENT_CONTEXT" -n "$CURRENT_NAMESPACE"
 }
 
 get_service() {
