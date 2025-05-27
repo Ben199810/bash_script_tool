@@ -107,3 +107,23 @@ check_helm() {
   fi
 }
 
+check_awscli() {
+  # 檢查是否安裝 awscli
+  if ! aws --version &> /dev/null; then
+    echo -e "${RED}awscli 未安裝，請先安裝 awscli。${NC}"
+
+  # 安裝 awscli
+    echo -e "${YELLOW}開始自動安裝 awscli...${NC}"
+    brew install awscli
+
+    # 再次檢查是否安裝成功
+    if ! aws --version &> /dev/null; then
+      echo -e "${RED}awscli 安裝失敗，請手動安裝。${NC}"
+      exit 1
+    else
+      echo -e "${GREEN}awscli 安裝成功。${NC}"
+    fi
+  else
+    echo -e "${GREEN}awscli 已安裝。${NC}"
+  fi
+}
