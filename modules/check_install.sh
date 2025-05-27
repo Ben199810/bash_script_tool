@@ -158,9 +158,20 @@ install_session_manager() {
   fi
 
   echo -e "${YELLOW}開始安裝 AWS Session Manager Plugin...${NC}"
-  curl "https://s3.amazonaws.com/session-manager-downloads/plugin/latest/mac/sessionmanager-bundle.zip" -o "sessionmanager-bundle.zip"
+  # 判斷是否為 ARM 架構
+  if [ "$(uname -m)" = "arm64" ]; then
+      echo "Detected Apple Silicon (ARM64)"
+      URL="https://s3.amazonaws.com/session-manager-downloads/plugin/latest/mac_arm64/sessionmanager-bundle.zip"
+  else
+      echo "Detected Intel (x86_64)"
+      URL="https://s3.amazonaws.com/session-manager-downloads/plugin/latest/mac/sessionmanager-bundle.zip"
+  fi
+
+  curl "$URL" -o "sessionmanager-bundle.zip"
   unzip sessionmanager-bundle.zip
   sudo ./sessionmanager-bundle/install -i /usr/local/sessionmanagerplugin -b /usr/local/bin/session-manager-plugin
+
+  rm -rf sessionmanager-bundle.zip sessionmanager-bundle
 }
 
 uninstall_session_manager() {
