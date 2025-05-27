@@ -11,3 +11,5 @@ check_iterm2
 check_zsh
 check_kubectl
 check_helm
+check_awscli
+check_granted

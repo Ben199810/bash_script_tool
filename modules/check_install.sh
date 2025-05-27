@@ -127,3 +127,25 @@ check_awscli() {
     echo -e "${GREEN}awscli 已安裝。${NC}"
   fi
 }
+
+check_granted() {
+  # 檢查是否安裝 granted
+  if ! granted --version &> /dev/null; then
+    echo -e "${RED}granted 未安裝，請先安裝 granted。${NC}"
+
+    # 安裝 granted
+    echo -e "${YELLOW}開始自動安裝 granted...${NC}"
+    brew tap common-fate/granted
+    brew install granted
+
+    # 再次檢查是否安裝成功
+    if ! granted -v &> /dev/null; then
+      echo -e "${RED}granted 安裝失敗，請手動安裝。${NC}"
+      exit 1
+    else
+      echo -e "${GREEN}granted 安裝成功。${NC}"
+    fi
+  else
+    echo -e "${GREEN}granted 已安裝。${NC}"
+  fi
+}
