@@ -13,3 +13,4 @@ check_kubectl
 check_helm
 check_awscli
 check_granted
+install_session_manager

@@ -149,3 +149,22 @@ check_granted() {
     echo -e "${GREEN}granted 已安裝。${NC}"
   fi
 }
+
+install_session_manager() {
+  # 檢查是否已安裝 AWS Session Manager Plugin
+  if command -v session-manager-plugin &> /dev/null; then
+    echo -e "${GREEN}AWS Session Manager Plugin 已安裝。${NC}"
+    return 0
+  fi
+
+  echo -e "${YELLOW}開始安裝 AWS Session Manager Plugin...${NC}"
+  curl "https://s3.amazonaws.com/session-manager-downloads/plugin/latest/mac/sessionmanager-bundle.zip" -o "sessionmanager-bundle.zip"
+  unzip sessionmanager-bundle.zip
+  sudo ./sessionmanager-bundle/install -i /usr/local/sessionmanagerplugin -b /usr/local/bin/session-manager-plugin
+}
+
+uninstall_session_manager() {
+  # 卸載 AWS Session Manager Plugin
+  sudo rm -rf /usr/local/sessionmanagerplugin
+  sudo rm /usr/local/bin/session-manager-plugin
+}
