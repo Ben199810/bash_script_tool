@@ -15,6 +15,13 @@ else
     NC='\033[0m' # No Color
 fi
 
+# 引入 kubectl 操作模組
+if [[ -f "$SCRIPT_DIR/../modules/kubectl_operate.sh" ]]; then
+    source "$SCRIPT_DIR/../modules/kubectl_operate.sh"
+else
+    echo "警告: 找不到 modules/kubectl_operate.sh，部分功能可能無法使用"
+fi
+
 # 引入 kubectl context 切換功能（可選）
 if [[ -f "$SCRIPT_DIR/switch_kubernetes_context.sh" ]]; then
     source "$SCRIPT_DIR/switch_kubernetes_context.sh"
@@ -25,39 +32,6 @@ fi
 # 額外的顏色定義（modules/default.sh 中沒有的）
 PURPLE='\033[0;35m'
 CYAN='\033[0;36m'
-
-# 檢查必要工具
-function check_dependencies() {
-    local missing_tools=()
-    
-    # 檢查 kubectl
-    if ! command -v kubectl &> /dev/null; then
-        missing_tools+=("kubectl")
-    fi
-    
-    # 檢查 jq（智慧搜尋功能需要）
-    if ! command -v jq &> /dev/null; then
-        missing_tools+=("jq")
-    fi
-    
-    if [ ${#missing_tools[@]} -ne 0 ]; then
-        echo -e "${RED}錯誤: 缺少必要工具: ${missing_tools[*]}${NC}"
-        echo -e "${YELLOW}請安裝缺少的工具後再執行此腳本${NC}"
-        echo ""
-        echo "安裝指令:"
-        for tool in "${missing_tools[@]}"; do
-            case $tool in
-                kubectl)
-                    echo "  brew install kubectl"
-                    ;;
-                jq)
-                    echo "  brew install jq"
-                    ;;
-            esac
-        done
-        exit 1
-    fi
-}
 
 function show_menu() {
     echo -e "${BLUE}=== K8s 資源搜尋工具 ===${NC}"
@@ -71,10 +45,12 @@ function show_menu() {
     echo -e "${CYAN}8. 搜尋 PVC (PersistentVolumeClaim)${NC}"
     echo -e "${CYAN}9. 搜尋 Node${NC}"
     echo -e "${CYAN}10. 搜尋 Namespace${NC}"
-    echo -e "${CYAN}11. 全域搜尋 (所有資源)${NC}"
-    echo -e "${CYAN}12. 按標籤搜尋${NC}"
-    echo -e "${CYAN}13. 按映像檔搜尋${NC}"
-    echo -e "${GREEN}14. 智慧關鍵字搜尋 (推薦)${NC}"
+    echo -e "${CYAN}11. 搜尋 Role${NC}"
+    echo -e "${CYAN}12. 搜尋 ClusterRole${NC}"
+    echo -e "${CYAN}13. 全域搜尋 (所有資源)${NC}"
+    echo -e "${CYAN}14. 按標籤搜尋${NC}"
+    echo -e "${CYAN}15. 按映像檔搜尋${NC}"
+    echo -e "${GREEN}16. 智慧關鍵字搜尋 (推薦)${NC}"
     echo -e "${CYAN}0. 退出${NC}"
     echo -e "${BLUE}================================${NC}"
 }
@@ -83,104 +59,56 @@ function search_pods() {
     read -p "請輸入要搜尋的 Pod 名稱關鍵字: " keyword
     read -p "請輸入 namespace (留空表示所有 namespace): " namespace
     
-    if [[ -z "$namespace" ]]; then
-        echo -e "${YELLOW}搜尋所有 namespace 中包含 '$keyword' 的 Pod...${NC}"
-        kubectl get pods --all-namespaces | grep -i "$keyword"
-    else
-        echo -e "${YELLOW}搜尋 namespace '$namespace' 中包含 '$keyword' 的 Pod...${NC}"
-        kubectl get pods -n "$namespace" | grep -i "$keyword"
-    fi
+    search_k8s_resources "pods" "$keyword" "$namespace"
 }
 
 function search_services() {
     read -p "請輸入要搜尋的 Service 名稱關鍵字: " keyword
     read -p "請輸入 namespace (留空表示所有 namespace): " namespace
     
-    if [[ -z "$namespace" ]]; then
-        echo -e "${YELLOW}搜尋所有 namespace 中包含 '$keyword' 的 Service...${NC}"
-        kubectl get services --all-namespaces | grep -i "$keyword"
-    else
-        echo -e "${YELLOW}搜尋 namespace '$namespace' 中包含 '$keyword' 的 Service...${NC}"
-        kubectl get services -n "$namespace" | grep -i "$keyword"
-    fi
+    search_k8s_resources "services" "$keyword" "$namespace"
 }
 
 function search_deployments() {
     read -p "請輸入要搜尋的 Deployment 名稱關鍵字: " keyword
     read -p "請輸入 namespace (留空表示所有 namespace): " namespace
     
-    if [[ -z "$namespace" ]]; then
-        echo -e "${YELLOW}搜尋所有 namespace 中包含 '$keyword' 的 Deployment...${NC}"
-        kubectl get deployments --all-namespaces | grep -i "$keyword"
-    else
-        echo -e "${YELLOW}搜尋 namespace '$namespace' 中包含 '$keyword' 的 Deployment...${NC}"
-        kubectl get deployments -n "$namespace" | grep -i "$keyword"
-    fi
+    search_k8s_resources "deployments" "$keyword" "$namespace"
 }
 
 function search_statefulsets() {
     read -p "請輸入要搜尋的 StatefulSet 名稱關鍵字: " keyword
     read -p "請輸入 namespace (留空表示所有 namespace): " namespace
     
-    if [[ -z "$namespace" ]]; then
-        echo -e "${YELLOW}搜尋所有 namespace 中包含 '$keyword' 的 StatefulSet...${NC}"
-        kubectl get statefulsets --all-namespaces | grep -i "$keyword"
-    else
-        echo -e "${YELLOW}搜尋 namespace '$namespace' 中包含 '$keyword' 的 StatefulSet...${NC}"
-        kubectl get statefulsets -n "$namespace" | grep -i "$keyword"
-    fi
+    search_k8s_resources "statefulsets" "$keyword" "$namespace"
 }
 
 function search_configmaps() {
     read -p "請輸入要搜尋的 ConfigMap 名稱關鍵字: " keyword
     read -p "請輸入 namespace (留空表示所有 namespace): " namespace
     
-    if [[ -z "$namespace" ]]; then
-        echo -e "${YELLOW}搜尋所有 namespace 中包含 '$keyword' 的 ConfigMap...${NC}"
-        kubectl get configmaps --all-namespaces | grep -i "$keyword"
-    else
-        echo -e "${YELLOW}搜尋 namespace '$namespace' 中包含 '$keyword' 的 ConfigMap...${NC}"
-        kubectl get configmaps -n "$namespace" | grep -i "$keyword"
-    fi
+    search_k8s_resources "configmaps" "$keyword" "$namespace"
 }
 
 function search_secrets() {
     read -p "請輸入要搜尋的 Secret 名稱關鍵字: " keyword
     read -p "請輸入 namespace (留空表示所有 namespace): " namespace
     
-    if [[ -z "$namespace" ]]; then
-        echo -e "${YELLOW}搜尋所有 namespace 中包含 '$keyword' 的 Secret...${NC}"
-        kubectl get secrets --all-namespaces | grep -i "$keyword"
-    else
-        echo -e "${YELLOW}搜尋 namespace '$namespace' 中包含 '$keyword' 的 Secret...${NC}"
-        kubectl get secrets -n "$namespace" | grep -i "$keyword"
-    fi
+    search_k8s_resources "secrets" "$keyword" "$namespace"
 }
 
 function search_ingress() {
     read -p "請輸入要搜尋的 Ingress 名稱關鍵字: " keyword
     read -p "請輸入 namespace (留空表示所有 namespace): " namespace
     
-    if [[ -z "$namespace" ]]; then
-        echo -e "${YELLOW}搜尋所有 namespace 中包含 '$keyword' 的 Ingress...${NC}"
-        kubectl get ingress --all-namespaces | grep -i "$keyword"
-    else
-        echo -e "${YELLOW}搜尋 namespace '$namespace' 中包含 '$keyword' 的 Ingress...${NC}"
-        kubectl get ingress -n "$namespace" | grep -i "$keyword"
-    fi
+    search_k8s_resources "ingress" "$keyword" "$namespace"
 }
 
 function search_pvc() {
     read -p "請輸入要搜尋的 PVC 名稱關鍵字: " keyword
     read -p "請輸入 namespace (留空表示所有 namespace): " namespace
     
-    if [[ -z "$namespace" ]]; then
-        echo -e "${YELLOW}搜尋所有 namespace 中包含 '$keyword' 的 PVC...${NC}"
-        kubectl get pvc --all-namespaces | grep -i "$keyword"
-    else
-        echo -e "${YELLOW}搜尋 namespace '$namespace' 中包含 '$keyword' 的 PVC...${NC}"
-        kubectl get pvc -n "$namespace" | grep -i "$keyword"
-    fi
+    search_k8s_resources "pvc" "$keyword" "$namespace"
 }
 
 function search_nodes() {
@@ -195,6 +123,20 @@ function search_namespaces() {
     
     echo -e "${YELLOW}搜尋包含 '$keyword' 的 Namespace...${NC}"
     kubectl get namespaces | grep -i "$keyword"
+}
+
+function search_roles() {
+    read -p "請輸入要搜尋的 Role 名稱關鍵字: " keyword
+    read -p "請輸入 namespace (留空表示所有 namespace): " namespace
+    
+    search_k8s_resources "roles" "$keyword" "$namespace"
+}
+
+function search_cluster_roles() {
+    read -p "請輸入要搜尋的 ClusterRole 名稱關鍵字: " keyword
+    
+    echo -e "${YELLOW}搜尋包含 '$keyword' 的 ClusterRole...${NC}"
+    kubectl get clusterroles | grep -i "$keyword"
 }
 
 function search_all_resources() {
@@ -244,106 +186,17 @@ function smart_keyword_search() {
     read -p "請輸入搜尋關鍵字: " keyword
     read -p "請輸入 namespace (留空表示所有 namespace): " namespace
     
-    echo -e "${GREEN}=== 智慧搜尋結果：關鍵字 '$keyword' ===${NC}"
-    
-    # 設定 namespace 參數
-    if [[ -z "$namespace" ]]; then
-        ns_param="--all-namespaces"
-        ns_flag=""
-    else
-        ns_param="-n $namespace"
-        ns_flag="-n $namespace"
-    fi
-    
-    # 搜尋各種資源類型
-    echo -e "\n${CYAN}🔍 搜尋 Pods:${NC}"
-    kubectl get pods $ns_param 2>/dev/null | grep -i "$keyword" || echo "  無相關 Pod"
-    
-    echo -e "\n${CYAN}🔍 搜尋 Services:${NC}"
-    kubectl get services $ns_param 2>/dev/null | grep -i "$keyword" || echo "  無相關 Service"
-    
-    echo -e "\n${CYAN}🔍 搜尋 Deployments:${NC}"
-    kubectl get deployments $ns_param 2>/dev/null | grep -i "$keyword" || echo "  無相關 Deployment"
-    
-    echo -e "\n${CYAN}🔍 搜尋 StatefulSets:${NC}"
-    kubectl get statefulsets $ns_param 2>/dev/null | grep -i "$keyword" || echo "  無相關 StatefulSet"
-    
-    echo -e "\n${CYAN}🔍 搜尋 ConfigMaps:${NC}"
-    kubectl get configmaps $ns_param 2>/dev/null | grep -i "$keyword" || echo "  無相關 ConfigMap"
-    
-    echo -e "\n${CYAN}🔍 搜尋 Secrets:${NC}"
-    kubectl get secrets $ns_param 2>/dev/null | grep -i "$keyword" || echo "  無相關 Secret"
-    
-    echo -e "\n${CYAN}🔍 搜尋 Ingress:${NC}"
-    kubectl get ingress $ns_param 2>/dev/null | grep -i "$keyword" || echo "  無相關 Ingress"
-    
-    echo -e "\n${CYAN}🔍 搜尋 PVCs:${NC}"
-    kubectl get pvc $ns_param 2>/dev/null | grep -i "$keyword" || echo "  無相關 PVC"
-    
-    # 只在搜尋所有 namespace 時搜尋 Node 和 Namespace
-    if [[ -z "$namespace" ]]; then
-        echo -e "\n${CYAN}🔍 搜尋 Nodes:${NC}"
-        kubectl get nodes 2>/dev/null | grep -i "$keyword" || echo "  無相關 Node"
-        
-        echo -e "\n${CYAN}🔍 搜尋 Namespaces:${NC}"
-        kubectl get namespaces 2>/dev/null | grep -i "$keyword" || echo "  無相關 Namespace"
-    fi
-    
-    # 搜尋標籤包含關鍵字的資源
-    echo -e "\n${CYAN}🏷️  搜尋標籤包含 '$keyword' 的資源:${NC}"
-    local label_results
-    label_results=$(kubectl get all $ns_param -o json 2>/dev/null | jq -r --arg keyword "$keyword" '
-        .items[] | 
-        select(.metadata.labels // {} | to_entries[] | .key or .value | test($keyword; "i")) |
-        "\(.kind)/\(.metadata.name) (namespace: \(.metadata.namespace // "default"))"
-    ' 2>/dev/null | head -10)
-    
-    if [[ -n "$label_results" ]]; then
-        echo "$label_results"
-    else
-        echo "  無相關標籤資源"
-    fi
-    
-    # 搜尋映像檔包含關鍵字的 Pod
-    echo -e "\n${CYAN}🐳 搜尋映像檔包含 '$keyword' 的 Pod:${NC}"
-    local image_results
-    image_results=$(kubectl get pods $ns_param -o json 2>/dev/null | jq -r --arg keyword "$keyword" '
-        .items[] | 
-        select(.spec.containers[]?.image // "" | test($keyword; "i")) |
-        "\(.metadata.namespace // "default")/\(.metadata.name) - 映像檔: \(.spec.containers[].image)"
-    ' 2>/dev/null | head -10)
-    
-    if [[ -n "$image_results" ]]; then
-        echo "$image_results"
-    else
-        echo "  無使用相關映像檔的 Pod"
-    fi
-    
-    # 搜尋資源描述或註解包含關鍵字
-    echo -e "\n${CYAN}📝 搜尋註解包含 '$keyword' 的資源:${NC}"
-    local annotation_results
-    annotation_results=$(kubectl get all $ns_param -o json 2>/dev/null | jq -r --arg keyword "$keyword" '
-        .items[] | 
-        select(.metadata.annotations // {} | to_entries[] | .key or .value | test($keyword; "i")) |
-        "\(.kind)/\(.metadata.name) (namespace: \(.metadata.namespace // "default"))"
-    ' 2>/dev/null | head -5)
-    
-    if [[ -n "$annotation_results" ]]; then
-        echo "$annotation_results"
-    else
-        echo "  無相關註解資源"
-    fi
-    
-    echo -e "\n${GREEN}=== 搜尋完成 ===${NC}"
+    # 使用模組中的智慧搜尋功能
+    smart_k8s_search "$keyword" "$namespace"
 }
 
 # 主程式
-# 檢查依賴工具
-check_dependencies
+# 檢查依賴工具 (使用模組中的函數)
+check_k8s_dependencies
 
 while true; do
     show_menu
-    read -p "請選擇操作 (0-14): " choice
+    read -p "請選擇操作 (0-16): " choice
     
     case $choice in
         1) search_pods ;;
@@ -356,10 +209,12 @@ while true; do
         8) search_pvc ;;
         9) search_nodes ;;
         10) search_namespaces ;;
-        11) search_all_resources ;;
-        12) search_by_label ;;
-        13) search_by_image ;;
-        14) smart_keyword_search ;;
+        11) search_roles ;;
+        12) search_cluster_roles ;;
+        13) search_all_resources ;;
+        14) search_by_label ;;
+        15) search_by_image ;;
+        16) smart_keyword_search ;;
         0) 
             echo -e "${GREEN}退出程式${NC}"
             exit 0
