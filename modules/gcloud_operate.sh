@@ -18,8 +18,7 @@ switch_gcp_project() {
 
   # 檢查用戶是否選擇了項目
   if [ -n "$SELECT_PROJECT" ]; then
-    echo -e "${BLUE}Switching to project: $SELECT_PROJECT${NC}"
-    gcloud config set project "$SELECT_PROJECT"
+    gcloud config set project "$SELECT_PROJECT" > /dev/null 2>&1
     echo -e "${GREEN}Switched to project: $(gcloud config get-value project)${NC}"
   else
     echo -e "${RED}No project selected. Exiting.${NC}"
