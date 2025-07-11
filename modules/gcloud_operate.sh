@@ -5,21 +5,21 @@ current_gcp_project() {
 
 switch_gcp_project() {
   # 列出所有的 GCP 項目
-  projects=$(gcloud projects list --format="value(projectId)")
+  local PROJECTS=$(gcloud projects list --format="value(projectId)")
 
   # 將項目 ID 儲存在一個陣列中
-  project_array=()
-  while IFS= read -r project; do
-    project_array+=("$project")
-  done <<< "$projects"
+  local PROJECT_ARRARY=()
+  while IFS= read -r PROJECT; do
+    PROJECT_ARRARY+=("$PROJECT")
+  done <<< "$PROJECTS"
 
   # 顯示所有項目 ID 並讓用戶選擇
-  selected_project=$(printf "%s\n" "${project_array[@]}" | fzf --prompt="Select a project: ")
+  local SELECT_PROJECT=$(printf "%s\n" "${PROJECT_ARRARY[@]}" | fzf --prompt="Select a GCP project: ")
 
   # 檢查用戶是否選擇了項目
-  if [ -n "$selected_project" ]; then
-    echo -e "${BLUE}Switching to project: $selected_project${NC}"
-    gcloud config set project "$selected_project"
+  if [ -n "$SELECT_PROJECT" ]; then
+    echo -e "${BLUE}Switching to project: $SELECT_PROJECT${NC}"
+    gcloud config set project "$SELECT_PROJECT"
     echo -e "${GREEN}Switched to project: $(gcloud config get-value project)${NC}"
   else
     echo -e "${RED}No project selected. Exiting.${NC}"
