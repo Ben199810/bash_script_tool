@@ -1,8 +1,50 @@
 #!/bin/bash
-source ../gcloud/switch_project.sh
+source ../modules/default.sh
+source ../modules/gcloud_operate.sh
 
-# 輸入要查詢的 serviceAccount 關鍵字，查詢該 serviceAccount 的 IAM 權限
-read -p "Enter the service account (e.g. [SERVICE_ACCOUNT]@[PROJECT_ID].iam.gserviceaccount.com): " SERVICE_ACCOUNT
+# 初始化當前項目
+current_gcp_project
 
-echo -e "${BLUE}Service Account Permissions:${NC}"
-gcloud projects get-iam-policy $CURRENT_PROJECT --flatten="bindings[].members" --filter="bindings.members:$SERVICE_ACCOUNT" --format="table(bindings.role, bindings.members)"
+# 顯示選單函數
+show_menu() {
+  echo -e "${BLUE}=== IAM Policy 管理工具 ===${NC}"
+  echo -e "${PURPLE}1. 查看 Service Account 資訊 (service_account_info)${NC}"
+  echo -e "${PURPLE}2. 查看 IAM 權限 (iam_permissions)${NC}"
+  echo -e "${PURPLE}0. 退出 (exit)${NC}"
+  echo -e "${BLUE}================================${NC}"
+}
+
+# 主程式循環
+while true; do
+  show_menu
+  read -p "請選擇操作 (0-2): " choice
+  case $choice in
+    1)
+      OPERATE="service_account_info"
+      ;;
+    2)
+      OPERATE="iam_permissions"
+      ;;
+    0)
+      OPERATE="exit"
+      echo -e "${GREEN}退出程式${NC}"
+      exit 0
+      ;;
+    *)
+      echo -e "${RED}無效的選擇${NC}"
+      exit 1
+      ;;
+  esac
+
+  # 主要功能列表
+  case $OPERATE in
+    "service_account_info")
+      choose_service_account
+      query_service_account_details $SERVICE_ACCOUNT
+    ;;
+    "iam_permissions")
+      choose_service_account
+      query_iam_permissions $SERVICE_ACCOUNT
+    ;;
+  esac
+done
