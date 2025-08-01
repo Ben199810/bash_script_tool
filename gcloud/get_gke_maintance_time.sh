@@ -1,9 +1,11 @@
 #!/bin/bash
 source ../modules/default.sh
 
+echo -e "${BLUE}正在獲取 Projects 列表...${NC}"
 PROJECTS=$(gcloud projects list --format="value(projectId)")
 
 for PROJECT in $PROJECTS; do
+  echo -e "${BLUE}正在處理專案: $PROJECT${NC}"
   GKES=$(gcloud container clusters list --project "$PROJECT" --format="value(name,location)" 2>/dev/null)
   if [[ -n "$GKES" ]]; then
     while IFS=$'\t' read -r CLUSTER_NAME LOCATION; do
