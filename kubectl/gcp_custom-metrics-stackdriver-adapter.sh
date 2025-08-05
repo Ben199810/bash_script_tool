@@ -484,41 +484,41 @@ function selective_delete() {
 }
 
 function check_adapter_status() {
-    echo ""
-    echo -e "${BLUE}=== Custom Metrics Stackdriver Adapter 狀態檢查 ===${NC}"
-    
-    echo -e "${CYAN}檢查 Deployment 狀態:${NC}"
-    kubectl get deployment custom-metrics-stackdriver-adapter -n custom-metrics --no-headers 2>/dev/null || echo "未找到 Deployment"
-    
-    echo ""
-    echo -e "${CYAN}檢查 Service 狀態:${NC}"
-    kubectl get service custom-metrics-stackdriver-adapter -n custom-metrics --no-headers 2>/dev/null || echo "未找到 Service"
-    
-    echo ""
-    echo -e "${CYAN}檢查 RBAC 資源 (包含 custom-metrics 關鍵字):${NC}"
-    
-    echo "ClusterRole:"
-    kubectl get clusterrole --no-headers 2>/dev/null | grep custom-metrics || echo "  未找到包含 custom-metrics 的 ClusterRole"
-    
-    echo ""
-    echo "ClusterRoleBinding:"
-    kubectl get clusterrolebinding --no-headers 2>/dev/null | grep custom-metrics || echo "  未找到包含 custom-metrics 的 ClusterRoleBinding"
-    
-    echo ""
-    echo "ServiceAccount:"
-    kubectl get serviceaccount -n custom-metrics --no-headers 2>/dev/null | grep custom-metrics || echo "  未找到包含 custom-metrics 的 ServiceAccount"
-    
-    echo ""
-    echo "RoleBinding:"
-    kubectl get rolebinding -n custom-metrics --no-headers 2>/dev/null | grep custom-metrics || echo "  未找到包含 custom-metrics 的 RoleBinding"
-    
-    echo ""
-    echo "Role:"
-    kubectl get role -n custom-metrics --no-headers 2>/dev/null | grep custom-metrics || echo "  未找到包含 custom-metrics 的 Role"
-    
-    echo ""
-    echo -e "${CYAN}檢查 APIService 狀態:${NC}"
-    kubectl get apiservice | grep custom.metrics.k8s.io || echo "未找到 custom.metrics.k8s.io APIService"
+  echo ""
+  echo -e "${BLUE}=== Custom Metrics Stackdriver Adapter 狀態檢查 ===${NC}"
+
+  echo "檢查 Deployment 狀態:"
+  kubectl get deployment custom-metrics-stackdriver-adapter -n custom-metrics --no-headers 2>/dev/null || echo "未找到 Deployment"
+
+  echo ""
+  echo "檢查 Service 狀態:"
+  kubectl get service custom-metrics-stackdriver-adapter -n custom-metrics --no-headers 2>/dev/null || echo "未找到 Service"
+
+  echo ""
+  echo "檢查 RBAC 資源 (包含 custom-metrics 關鍵字):"
+
+  echo "ClusterRole:"
+  kubectl get clusterrole --no-headers 2>/dev/null | grep custom-metrics || echo "  未找到包含 custom-metrics 的 ClusterRole"
+
+  echo ""
+  echo "ClusterRoleBinding:"
+  kubectl get clusterrolebinding --no-headers 2>/dev/null | grep custom-metrics || echo "  未找到包含 custom-metrics 的 ClusterRoleBinding"
+
+  echo ""
+  echo "ServiceAccount:"
+  kubectl get serviceaccount -n custom-metrics --no-headers 2>/dev/null | grep custom-metrics || echo "  未找到包含 custom-metrics 的 ServiceAccount"
+
+  echo ""
+  echo "RoleBinding:"
+  kubectl get rolebinding -A --no-headers 2>/dev/null | grep custom-metrics || echo "  未找到包含 custom-metrics 的 RoleBinding"
+
+  echo ""
+  echo "Role:"
+  kubectl get role -A --no-headers 2>/dev/null | grep custom-metrics || echo "  未找到包含 custom-metrics 的 Role"
+
+  echo ""
+  echo "檢查 APIService 狀態:"
+  kubectl get apiservice | grep custom.metrics.k8s.io || echo "未找到 custom.metrics.k8s.io APIService"
 }
 
 function main() {
