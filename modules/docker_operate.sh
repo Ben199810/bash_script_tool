@@ -1,44 +1,34 @@
 docker_pull() {
-  local images=("$@")
-  for image in "${images[@]}"; do
-    echo -e "${BLUE}Pulling image: $image${NC}"
-    docker pull $image
-  done
+  local image="$1"
+  echo -e "${BLUE}Pulling image: $image${NC}"
+  docker pull "$image"
 }
 
 docker_tag() {
-  local -a images=("${!1}")      # 第一個陣列參數
-  local -a new_images=("${!2}")  # 第二個陣列參數
-
-  # 檢查兩個陣列的長度是否相同
-  echo -e "${BLUE}Number of images: ${#images[@]}${NC}"
-  echo -e "${BLUE}Number of new images: ${#new_images[@]}${NC}"
-
-  if [[ ${#images[@]} -ne ${#new_images[@]} ]]; then
-    echo -e "${RED}Error: The number of images and new images must match.${NC}"
-    exit 1
-  fi
-
-  for i in "${!images[@]}"; do
-    local image="${images[$i]}"
-    local new_image="${new_images[$i]}"
+  local image="$1"
+  local new_image="$2"
+  if [ "$image" != "" ] && [ "$new_image" != "" ]; then
     echo -e "${YELLOW}Tagging image: $image -> $new_image${NC}"
     docker tag "$image" "$new_image"
-  done
+  elif [ "$image" == "" ] || [ "$new_image" == "" ]; then
+    echo -e "${RED}Error: image and new_image must be provided.${NC}"
+    if [ -z "$image" ]; then
+      echo -e "${RED}Error: image is not set.${NC}"
+    fi
+    if [ -z "$new_image" ]; then
+      echo -e "${RED}Error: new_image is not set.${NC}"
+    fi
+  fi
 }
 
 docker_push() {
-  local images=("$@")
-  for image in "${images[@]}"; do
-    echo -e "${BLUE}Pushing image: $image${NC}"
-    docker push $image
-  done
+  local image="$1"
+  echo -e "${BLUE}Pushing image: $image${NC}"
+  docker push "$image"
 }
 
 docker_rmi() {
-  local images=("$@")
-  for image in "${images[@]}"; do
-    echo -e "${BLUE}Removing image: $image${NC}"
-    docker rmi $image
-  done
+  local image="$1"
+  echo -e "${BLUE}Removing image: $image${NC}"
+  docker rmi "$image"
 }
