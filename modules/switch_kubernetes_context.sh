@@ -1,17 +1,17 @@
 #!/bin/bash
 source ../modules/default.sh
 
-CURRENT_CONTEXT
-CURRENT_NAMESPACE
+declare CURRENT_CONTEXT=""
+declare CURRENT_NAMESPACE=""
 
 function current_context() {
-  $CURRENT_CONTEXT=$(kubectl config current-context)
-  echo -e "${BLUE}Current Kubernetes contexts: $CURRENT_CONTEXT${NC}"
+  CURRENT_CONTEXT=$(kubectl config current-context)
+  echo -e "${BLUE}當前本機環境 Kubernetes contexts: $CURRENT_CONTEXT${NC}"
 }
 
 function current_namespace() {
-  $CURRENT_NAMESPACE=$(kubectl config view --minify -o jsonpath='{..namespace}')
-  echo -e "${BLUE}Current Kubernetes namespace: $CURRENT_NAMESPACE${NC}"
+  CURRENT_NAMESPACE=$(kubectl config view --minify -o jsonpath='{..namespace}')
+  echo -e "${BLUE}當前本機環境 Kubernetes namespace: $CURRENT_NAMESPACE${NC}"
 }
 
 function switch_context() {
@@ -19,7 +19,7 @@ function switch_context() {
   if [ -n "$KUBE_CONTEXT" ]; then
     kubectl config use-context "$KUBE_CONTEXT"
   else
-    echo -e "${RED}No context selected. Exiting.${NC}"
+    echo -e "${RED}未選擇 Kubernetes Context，退出。${NC}"
     exit 1
   fi
 }
@@ -31,11 +31,12 @@ function switch_namespace() {
     KUBE_NAMESPACE=${KUBE_NAMESPACE#namespace/}
     kubectl config set-context --current --namespace="$KUBE_NAMESPACE"
   else
-    echo -e "${RED}No namespace selected. Exiting.${NC}"
+    echo -e "${RED}未選擇命名空間，退出。${NC}"
     exit 1
   fi
 }
 
+# 實作切換 Kubernetes Context 和 Namespace 的介面流程
 switch_context_interface(){
   current_context
   current_namespace
@@ -47,7 +48,7 @@ switch_context_interface(){
     KUBE_NAMESPACE=$(kubectl get namespaces -o name | fzf --prompt="Select a namespace: ")
     switch_namespace $KUBE_NAMESPACE
   else
-    echo -e "${YELLOW}Skipping context switch.${NC}"
+    echo -e "${YELLOW}跳過切換。${NC}"
   fi
 
   current_context
