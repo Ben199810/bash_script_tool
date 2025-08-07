@@ -87,50 +87,46 @@ pod_df() {
   done
 }
 
-# 取得 deployment 複數的 Pod 名稱，隨機選擇一個 Pod
-AIO_WEB_POD=$(kubectl get pod -n $CURRENT_NAMESPACE --no-headers -o 'custom-columns=NAME:.metadata.name' | grep aio-web-ball-member | grep -v nginx-proxy | shuf -n 1)
-AIO_API_POD=$(kubectl get pod -n $CURRENT_NAMESPACE --no-headers -o 'custom-columns=NAME:.metadata.name' | grep aio-api-ball-member | grep -v nginx-proxy | shuf -n 1)
-BALL_MEMBER_POD=$(kubectl get pod -n $CURRENT_NAMESPACE --no-headers -o 'custom-columns=NAME:.metadata.name' | grep ball-member | grep -v nginx-proxy | grep -v aio | grep -v bg | shuf -n 1)
-BAMBI_OFFERCENTER_POD=$(kubectl get pod -n $CURRENT_NAMESPACE --no-headers -o 'custom-columns=NAME:.metadata.name' | grep bambi-offercenter | shuf -n 1)
-INTERNAL_BLISSEY_POD=$(kubectl get pod -n $CURRENT_NAMESPACE --no-headers -o 'custom-columns=NAME:.metadata.name' | grep internal-blissey | shuf -n 1)
-CTL_BLISSEY_POD=$(kubectl get pod -n $CURRENT_NAMESPACE --no-headers -o 'custom-columns=NAME:.metadata.name' | grep ctl-blissey | shuf -n 1)
-HALL_BLISSEY_POD=$(kubectl get pod -n $CURRENT_NAMESPACE --no-headers -o 'custom-columns=NAME:.metadata.name' | grep hall-blissey | shuf -n 1)
-EAGLE_POD=$(kubectl get pod -n $CURRENT_NAMESPACE --no-headers -o 'custom-columns=NAME:.metadata.name' | grep eagle | shuf -n 1)
-WOLF_POD=$(kubectl get pod -n $CURRENT_NAMESPACE --no-headers -o 'custom-columns=NAME:.metadata.name' | grep wolf | shuf -n 1)
-IPL_CTL_BACKGROUND_POD=$(kubectl get pod -n $CURRENT_NAMESPACE --no-headers -o 'custom-columns=NAME:.metadata.name' | grep ipl-ctl-background | shuf -n 1)
-CHECK_INFO_POD=$(kubectl get pod -n $CURRENT_NAMESPACE --no-headers -o 'custom-columns=NAME:.metadata.name' | grep checkinfo | shuf -n 1)
+get_random_pod() {
+  AIO_WEB_POD=$(kubectl get pod -n $CURRENT_NAMESPACE --no-headers -o 'custom-columns=NAME:.metadata.name' | grep aio-web-ball-member | grep -v nginx-proxy | shuf -n 1)
+  AIO_API_POD=$(kubectl get pod -n $CURRENT_NAMESPACE --no-headers -o 'custom-columns=NAME:.metadata.name' | grep aio-api-ball-member | grep -v nginx-proxy | shuf -n 1)
+  BALL_MEMBER_POD=$(kubectl get pod -n $CURRENT_NAMESPACE --no-headers -o 'custom-columns=NAME:.metadata.name' | grep ball-member | grep -v nginx-proxy | grep -v aio | grep -v bg | shuf -n 1)
+  BAMBI_OFFERCENTER_POD=$(kubectl get pod -n $CURRENT_NAMESPACE --no-headers -o 'custom-columns=NAME:.metadata.name' | grep bambi-offercenter | shuf -n 1)
+  INTERNAL_BLISSEY_POD=$(kubectl get pod -n $CURRENT_NAMESPACE --no-headers -o 'custom-columns=NAME:.metadata.name' | grep internal-blissey | shuf -n 1)
+  CTL_BLISSEY_POD=$(kubectl get pod -n $CURRENT_NAMESPACE --no-headers -o 'custom-columns=NAME:.metadata.name' | grep ctl-blissey | shuf -n 1)
+  HALL_BLISSEY_POD=$(kubectl get pod -n $CURRENT_NAMESPACE --no-headers -o 'custom-columns=NAME:.metadata.name' | grep hall-blissey | shuf -n 1)
+  EAGLE_POD=$(kubectl get pod -n $CURRENT_NAMESPACE --no-headers -o 'custom-columns=NAME:.metadata.name' | grep eagle | shuf -n 1)
+  WOLF_POD=$(kubectl get pod -n $CURRENT_NAMESPACE --no-headers -o 'custom-columns=NAME:.metadata.name' | grep wolf | shuf -n 1)
+  IPL_CTL_BACKGROUND_POD=$(kubectl get pod -n $CURRENT_NAMESPACE --no-headers -o 'custom-columns=NAME:.metadata.name' | grep ipl-ctl-background | shuf -n 1)
+  CHECK_INFO_POD=$(kubectl get pod -n $CURRENT_NAMESPACE --no-headers -o 'custom-columns=NAME:.metadata.name' | grep checkinfo | shuf -n 1)
+}
 
 # 檢查 Pod 的檔案系統使用情況
-# read-write
-pod_df "${EAGLE_POD}" "go"
-echo ""
+main() {
+  get_random_pod
+  # read-write
+  pod_df "${EAGLE_POD}" "go"
+  echo ""
+  pod_df "${WOLF_POD}" "go"
+  echo ""
+  pod_df "${IPL_CTL_BACKGROUND_POD}" "php"
+  echo ""
+  pod_df "${CTL_BLISSEY_POD}" "php"
+  echo ""
+  pod_df "${HALL_BLISSEY_POD}" "php"
+  echo ""
+  pod_df "${INTERNAL_BLISSEY_POD}" "php"
+  echo ""
+  # read-only
+  pod_df "${CHECK_INFO_POD}" "php"
+  echo ""
+  pod_df "${BAMBI_OFFERCENTER_POD}" "app"
+  echo ""
+  pod_df "${AIO_API_POD}" "php"
+  echo ""
+  pod_df "${AIO_WEB_POD}" "php"
+  echo ""
+  pod_df "${BALL_MEMBER_POD}" "php"
+}
 
-pod_df "${WOLF_POD}" "go"
-echo ""
-
-pod_df "${IPL_CTL_BACKGROUND_POD}" "php"
-echo ""
-
-pod_df "${CTL_BLISSEY_POD}" "php"
-echo ""
-
-pod_df "${HALL_BLISSEY_POD}" "php"
-echo ""
-
-pod_df "${INTERNAL_BLISSEY_POD}" "php"
-echo ""
-
-# read-only
-pod_df "${CHECK_INFO_POD}" "php"
-echo ""
-
-pod_df "${BAMBI_OFFERCENTER_POD}" "app"
-echo ""
-
-pod_df "${AIO_API_POD}" "php"
-echo ""
-
-pod_df "${AIO_WEB_POD}" "php"
-echo ""
-
-pod_df "${BALL_MEMBER_POD}" "php"
+main
