@@ -24,67 +24,65 @@ readonly PROD_CONTEXT="gke_gcp-20220425-006_asia-east1_bbin-interface-prod"
 
 # 對 Pod 使用客製化的 df 指令，獲取想要的資訊
 pod_df() {
-  PODS="$1"
+  POD="$1"
   CONTAINER_NAME="$2"
 
   # 檢查是否有找到符合條件的 Pod，如果沒有找到，則輸出提示信息並返回錯誤碼
-  if [ -z "$PODS" ]; then
+  if [ -z "$POD" ]; then
     echo -e "${YELLOW}無法找到符合搜尋條件的 Pod 在命名空間 $CURRENT_NAMESPACE 中${NC}"
     return 1
   fi
 
-  for POD in $PODS; do
-    echo -e "${BLUE}Checking pod: $POD${NC}"
-    # 檢查當前上下文是否為指定的環境
-    if [[ $CURRENT_CONTEXT == "$QA_CONTEXT" || $CURRENT_CONTEXT == "$DEV_CONTEXT" ]]; then
-      kubectl exec --context="$CURRENT_CONTEXT" -n "$CURRENT_NAMESPACE" "$POD" -c "$CONTAINER_NAME" -- df -h | awk '
-      /^'"${DEV_QA_FILESTORE_IP}"'/ {
-        filesystem = $0
-        getline
-        print "Filesystem:", filesystem, "Used:", $2, "Available:", $3, "Use%:", $4, "Mountpoint:", $5
-      }'
-    elif [[ $CURRENT_CONTEXT == "$STAGING_CONTEXT" ]]; then
-      kubectl exec --context="$CURRENT_CONTEXT" -n "$CURRENT_NAMESPACE" "$POD" -c "$CONTAINER_NAME" -- df -h | awk '
-      /^'"${STAGING_TXT_FILESTORE_IP}"'/ {
-        filesystem = $0
-        getline
-        print "Filesystem:", filesystem, "Used:", $2, "Available:", $3, "Use%:", $4, "Mountpoint:", $5
-      }'
-      kubectl exec --context="$CURRENT_CONTEXT" -n "$CURRENT_NAMESPACE" "$POD" -c "$CONTAINER_NAME" -- df -h | awk '
-      /^'"${STAGING_AIO_TXT_FILESTORE_IP}"'/ {
-        filesystem = $0
-        getline
-        print "Filesystem:", filesystem, "Used:", $2, "Available:", $3, "Use%:", $4, "Mountpoint:", $5
-      }'
-      kubectl exec --context="$CURRENT_CONTEXT" -n "$CURRENT_NAMESPACE" "$POD" -c "$CONTAINER_NAME" -- df -h | awk '
-      /^'"${STAGING_AH_TXT_FILESTORE_IP}"'/ {
-        filesystem = $0
-        getline
-        print "Filesystem:", filesystem, "Used:", $2, "Available:", $3, "Use%:", $4, "Mountpoint:", $5
-      }'
-    elif [[ $CURRENT_CONTEXT == "$PROD_CONTEXT" ]]; then
-      kubectl exec --context="$CURRENT_CONTEXT" -n "$CURRENT_NAMESPACE" "$POD" -c "$CONTAINER_NAME" -- df -h | awk '
-      /^'"${PROD_TXT_FILESTORE_IP}"'/ {
-        filesystem = $0
-        getline
-        print "Filesystem:", filesystem, "Used:", $2, "Available:", $3, "Use%:", $4, "Mountpoint:", $5
-      }'
-      kubectl exec --context="$CURRENT_CONTEXT" -n "$CURRENT_NAMESPACE" "$POD" -c "$CONTAINER_NAME" -- df -h | awk '
-      /^'"${PROD_AIO_TXT_FILESTORE_IP}"'/ {
-        filesystem = $0
-        getline
-        print "Filesystem:", filesystem, "Used:", $2, "Available:", $3, "Use%:", $4, "Mountpoint:", $5
-      }'
-      kubectl exec --context="$CURRENT_CONTEXT" -n "$CURRENT_NAMESPACE" "$POD" -c "$CONTAINER_NAME" -- df -h | awk '
-      /^'"${PROD_AH_TXT_FILESTORE_IP}"'/ {
-        filesystem = $0
-        getline
-        print "Filesystem:", filesystem, "Used:", $2, "Available:", $3, "Use%:", $4, "Mountpoint:", $5
-      }'
-    else
-      echo "Skipping pod $POD for context $CURRENT_CONTEXT as it is not in the specified environments."
-    fi
-  done
+  echo -e "${BLUE}Checking pod: $POD${NC}"
+  # 檢查當前上下文是否為指定的環境
+  if [[ $CURRENT_CONTEXT == "$QA_CONTEXT" || $CURRENT_CONTEXT == "$DEV_CONTEXT" ]]; then
+    kubectl exec --context="$CURRENT_CONTEXT" -n "$CURRENT_NAMESPACE" "$POD" -c "$CONTAINER_NAME" -- df -h | awk '
+    /^'"${DEV_QA_FILESTORE_IP}"'/ {
+      filesystem = $0
+      getline
+      print "Filesystem:", filesystem, "Used:", $2, "Available:", $3, "Use%:", $4, "Mountpoint:", $5
+    }'
+  elif [[ $CURRENT_CONTEXT == "$STAGING_CONTEXT" ]]; then
+    kubectl exec --context="$CURRENT_CONTEXT" -n "$CURRENT_NAMESPACE" "$POD" -c "$CONTAINER_NAME" -- df -h | awk '
+    /^'"${STAGING_TXT_FILESTORE_IP}"'/ {
+      filesystem = $0
+      getline
+      print "Filesystem:", filesystem, "Used:", $2, "Available:", $3, "Use%:", $4, "Mountpoint:", $5
+    }'
+    kubectl exec --context="$CURRENT_CONTEXT" -n "$CURRENT_NAMESPACE" "$POD" -c "$CONTAINER_NAME" -- df -h | awk '
+    /^'"${STAGING_AIO_TXT_FILESTORE_IP}"'/ {
+      filesystem = $0
+      getline
+      print "Filesystem:", filesystem, "Used:", $2, "Available:", $3, "Use%:", $4, "Mountpoint:", $5
+    }'
+    kubectl exec --context="$CURRENT_CONTEXT" -n "$CURRENT_NAMESPACE" "$POD" -c "$CONTAINER_NAME" -- df -h | awk '
+    /^'"${STAGING_AH_TXT_FILESTORE_IP}"'/ {
+      filesystem = $0
+      getline
+      print "Filesystem:", filesystem, "Used:", $2, "Available:", $3, "Use%:", $4, "Mountpoint:", $5
+    }'
+  elif [[ $CURRENT_CONTEXT == "$PROD_CONTEXT" ]]; then
+    kubectl exec --context="$CURRENT_CONTEXT" -n "$CURRENT_NAMESPACE" "$POD" -c "$CONTAINER_NAME" -- df -h | awk '
+    /^'"${PROD_TXT_FILESTORE_IP}"'/ {
+      filesystem = $0
+      getline
+      print "Filesystem:", filesystem, "Used:", $2, "Available:", $3, "Use%:", $4, "Mountpoint:", $5
+    }'
+    kubectl exec --context="$CURRENT_CONTEXT" -n "$CURRENT_NAMESPACE" "$POD" -c "$CONTAINER_NAME" -- df -h | awk '
+    /^'"${PROD_AIO_TXT_FILESTORE_IP}"'/ {
+      filesystem = $0
+      getline
+      print "Filesystem:", filesystem, "Used:", $2, "Available:", $3, "Use%:", $4, "Mountpoint:", $5
+    }'
+    kubectl exec --context="$CURRENT_CONTEXT" -n "$CURRENT_NAMESPACE" "$POD" -c "$CONTAINER_NAME" -- df -h | awk '
+    /^'"${PROD_AH_TXT_FILESTORE_IP}"'/ {
+      filesystem = $0
+      getline
+      print "Filesystem:", filesystem, "Used:", $2, "Available:", $3, "Use%:", $4, "Mountpoint:", $5
+    }'
+  else
+    echo "Skipping pod $POD for context $CURRENT_CONTEXT as it is not in the specified environments."
+  fi
 }
 
 get_random_pod() {
