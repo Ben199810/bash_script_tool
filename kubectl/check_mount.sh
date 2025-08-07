@@ -1,7 +1,7 @@
 #!/bin/bash
 source ../modules/switch_kubernetes_context.sh
 
-switch_context_interface # 切換 Kubernetes Context 和 Namespace 的介面流程
+switch_context_interface # 切換 Kubernetes Context 和 Namespace 的介面實作
 
 # 定義常數
 
@@ -24,8 +24,8 @@ readonly PROD_CONTEXT="gke_gcp-20220425-006_asia-east1_bbin-interface-prod"
 
 # 對 Pod 使用客製化的 df 指令，獲取想要的資訊
 pod_df() {
-  POD="$1"
-  CONTAINER_NAME="$2"
+  local POD="$1"
+  local CONTAINER_NAME="$2"
 
   # 檢查是否有找到符合條件的 Pod，如果沒有找到，則輸出提示信息並返回錯誤碼
   if [ -z "$POD" ]; then
@@ -33,7 +33,8 @@ pod_df() {
     return 1
   fi
 
-  echo -e "${BLUE}Checking pod: $POD${NC}"
+  echo -e "${CYAN}📊 檢查 Pod: $POD${NC}"
+  echo -e "${GREEN}💽 磁碟使用情況:${NC}"
   # 檢查當前上下文是否為指定的環境
   if [[ $CURRENT_CONTEXT == "$QA_CONTEXT" || $CURRENT_CONTEXT == "$DEV_CONTEXT" ]]; then
     kubectl exec --context="$CURRENT_CONTEXT" -n "$CURRENT_NAMESPACE" "$POD" -c "$CONTAINER_NAME" -- df -h | awk '
@@ -99,21 +100,58 @@ get_random_pod() {
   CHECK_INFO_POD=$(kubectl get pod -n $CURRENT_NAMESPACE --no-headers -o 'custom-columns=NAME:.metadata.name' | grep checkinfo | shuf -n 1)
 }
 
+check_pod_readwrite_volumeMount() {
+  local POD="$1"
+  local CONTAINER_NAME="$2"
+  
+  # 檢查參數
+  if [ -z "$POD" ]; then
+    echo -e "$無法找到符合搜尋條件的 Pod 在命名空間 $CURRENT_NAMESPACE 中${NC}"
+    return 1
+  fi
+  
+  echo -e "${CYAN}╔════════════════════════════════════════════════════════════════════════════════╗${NC}"
+  echo -e "${CYAN}║                     📋 Pod Volume 配置檢查報告                                  ║${NC}"
+  echo -e "${CYAN}╠════════════════════════════════════════════════════════════════════════════════╣${NC}"
+  echo -e "${CYAN}║ Pod 名稱: ${YELLOW}$POD${NC}"
+  echo -e "${CYAN}║ 容器名稱: ${YELLOW}$CONTAINER_NAME${NC}"
+  echo -e "${CYAN}╚════════════════════════════════════════════════════════════════════════════════╝${NC}"
+  
+  echo ""
+  echo -e "${GREEN}📁 Volume Mounts 掛載點:${NC}"
+  kubectl get pod "$POD" -n "$CURRENT_NAMESPACE" -o json | jq -r --arg CONTAINER_NAME "$CONTAINER_NAME" '.spec.containers[] | select(.name == $CONTAINER_NAME) | (.volumeMounts[]? | "  🔗 \(.mountPath) -> Volume: \(.name)")'
+  
+  echo ""
+  echo -e "${GREEN}💾 Persistent Volume Claims:${NC}"
+  kubectl get pod "$POD" -n "$CURRENT_NAMESPACE" -o json | jq -r '.spec.volumes[]? | select(has("persistentVolumeClaim")) | "  📦 Volume: \(.name) -> PVC: \(.persistentVolumeClaim.claimName)"'
+  
+  echo ""
+  echo -e "${BLUE}────────────────────────────────────────────────────────────────────────────────${NC}"
+}
+
 # 檢查 Pod 的檔案系統使用情況
 main() {
   get_random_pod
+  echo -e "${YELLOW}🚀 開始檢查 Pod Volume 掛載和磁碟使用情況${NC}"
+  echo -e "${YELLOW}═══════════════════════════════════════════════════════════════════════════════════${NC}"
   # read-write
   pod_df "${EAGLE_POD}" "go"
+  check_pod_readwrite_volumeMount "$EAGLE_POD" "go"
   echo ""
   pod_df "${WOLF_POD}" "go"
+  check_pod_readwrite_volumeMount "$WOLF_POD" "go"
   echo ""
   pod_df "${IPL_CTL_BACKGROUND_POD}" "php"
+  check_pod_readwrite_volumeMount "${IPL_CTL_BACKGROUND_POD}" "php"
   echo ""
   pod_df "${CTL_BLISSEY_POD}" "php"
+  check_pod_readwrite_volumeMount "${CTL_BLISSEY_POD}" "php"
   echo ""
   pod_df "${HALL_BLISSEY_POD}" "php"
+  check_pod_readwrite_volumeMount "${HALL_BLISSEY_POD}" "php"
   echo ""
   pod_df "${INTERNAL_BLISSEY_POD}" "php"
+  check_pod_readwrite_volumeMount "${INTERNAL_BLISSEY_POD}" "php"
   echo ""
   # read-only
   pod_df "${CHECK_INFO_POD}" "php"
@@ -125,6 +163,7 @@ main() {
   pod_df "${AIO_WEB_POD}" "php"
   echo ""
   pod_df "${BALL_MEMBER_POD}" "php"
+  echo -e "${YELLOW}✅ 檢查完成！${NC}"
 }
 
 main
