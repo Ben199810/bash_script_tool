@@ -20,8 +20,6 @@ readonly PROD_AIO_TXT_FILESTORE_IP="172.18.2.66"
 readonly PROD_AH_TXT_FILESTORE_IP="172.18.2.194"
 readonly PROD_CONTEXT="gke_gcp-20220425-006_asia-east1_bbin-interface-prod"
 
-
-
 # 對 Pod 使用客製化的 df 指令，獲取想要的資訊
 pod_df() {
   local POD="$1"
@@ -29,61 +27,47 @@ pod_df() {
 
   # 檢查是否有找到符合條件的 Pod，如果沒有找到，則輸出提示信息並返回錯誤碼
   if [ -z "$POD" ]; then
-    echo -e "${YELLOW}無法找到符合搜尋條件的 Pod 在命名空間 $CURRENT_NAMESPACE 中${NC}"
+    echo -e "${YELLOW}無法找到 POD 在命名空間 $CURRENT_NAMESPACE 中${NC}"
     return 1
   fi
 
   echo -e "${CYAN}📊 檢查 Pod: $POD${NC}"
   echo -e "${GREEN}💽 磁碟使用情況:${NC}"
-  # 檢查當前上下文是否為指定的環境
-  if [[ $CURRENT_CONTEXT == "$QA_CONTEXT" || $CURRENT_CONTEXT == "$DEV_CONTEXT" ]]; then
+
+  check_filestore() {
+    local IP="$1"
+    local NAME="$2"
     kubectl exec --context="$CURRENT_CONTEXT" -n "$CURRENT_NAMESPACE" "$POD" -c "$CONTAINER_NAME" -- df -h | awk '
-    /^'"${DEV_QA_FILESTORE_IP}"'/ {
+    /^'"${IP}"'/ {
       filesystem = $0
       getline
-      print "Filesystem:", filesystem, "Used:", $2, "Available:", $3, "Use%:", $4, "Mountpoint:", $5
+      print "Filesystem:", filesystem, "Used:", $2, "可用:", $3, "使用率:", $4, "掛載點:", $5
     }'
-  elif [[ $CURRENT_CONTEXT == "$STAGING_CONTEXT" ]]; then
-    kubectl exec --context="$CURRENT_CONTEXT" -n "$CURRENT_NAMESPACE" "$POD" -c "$CONTAINER_NAME" -- df -h | awk '
-    /^'"${STAGING_TXT_FILESTORE_IP}"'/ {
-      filesystem = $0
-      getline
-      print "Filesystem:", filesystem, "Used:", $2, "Available:", $3, "Use%:", $4, "Mountpoint:", $5
-    }'
-    kubectl exec --context="$CURRENT_CONTEXT" -n "$CURRENT_NAMESPACE" "$POD" -c "$CONTAINER_NAME" -- df -h | awk '
-    /^'"${STAGING_AIO_TXT_FILESTORE_IP}"'/ {
-      filesystem = $0
-      getline
-      print "Filesystem:", filesystem, "Used:", $2, "Available:", $3, "Use%:", $4, "Mountpoint:", $5
-    }'
-    kubectl exec --context="$CURRENT_CONTEXT" -n "$CURRENT_NAMESPACE" "$POD" -c "$CONTAINER_NAME" -- df -h | awk '
-    /^'"${STAGING_AH_TXT_FILESTORE_IP}"'/ {
-      filesystem = $0
-      getline
-      print "Filesystem:", filesystem, "Used:", $2, "Available:", $3, "Use%:", $4, "Mountpoint:", $5
-    }'
-  elif [[ $CURRENT_CONTEXT == "$PROD_CONTEXT" ]]; then
-    kubectl exec --context="$CURRENT_CONTEXT" -n "$CURRENT_NAMESPACE" "$POD" -c "$CONTAINER_NAME" -- df -h | awk '
-    /^'"${PROD_TXT_FILESTORE_IP}"'/ {
-      filesystem = $0
-      getline
-      print "Filesystem:", filesystem, "Used:", $2, "Available:", $3, "Use%:", $4, "Mountpoint:", $5
-    }'
-    kubectl exec --context="$CURRENT_CONTEXT" -n "$CURRENT_NAMESPACE" "$POD" -c "$CONTAINER_NAME" -- df -h | awk '
-    /^'"${PROD_AIO_TXT_FILESTORE_IP}"'/ {
-      filesystem = $0
-      getline
-      print "Filesystem:", filesystem, "Used:", $2, "Available:", $3, "Use%:", $4, "Mountpoint:", $5
-    }'
-    kubectl exec --context="$CURRENT_CONTEXT" -n "$CURRENT_NAMESPACE" "$POD" -c "$CONTAINER_NAME" -- df -h | awk '
-    /^'"${PROD_AH_TXT_FILESTORE_IP}"'/ {
-      filesystem = $0
-      getline
-      print "Filesystem:", filesystem, "Used:", $2, "Available:", $3, "Use%:", $4, "Mountpoint:", $5
-    }'
-  else
-    echo "Skipping pod $POD for context $CURRENT_CONTEXT as it is not in the specified environments."
-  fi
+  }
+
+  # 根據環境執行相應的檢查
+  case "$CURRENT_CONTEXT" in
+    "$DEV_CONTEXT")
+      check_filestore "$DEV_QA_FILESTORE_IP" "DEV Filestore"
+      ;;
+    "$QA_CONTEXT")
+      check_filestore "$DEV_QA_FILESTORE_IP" "QA Filestore"
+      ;;
+    "$STAGING_CONTEXT")
+      check_filestore "$STAGING_TXT_FILESTORE_IP" "STAGING TXT"
+      check_filestore "$STAGING_AIO_TXT_FILESTORE_IP" "STAGING AIO TXT"
+      check_filestore "$STAGING_AH_TXT_FILESTORE_IP" "STAGING AH TXT"
+      ;;
+    "$PROD_CONTEXT")
+      check_filestore "$PROD_TXT_FILESTORE_IP" "PROD TXT"
+      check_filestore "$PROD_AIO_TXT_FILESTORE_IP" "PROD AIO TXT"
+      check_filestore "$PROD_AH_TXT_FILESTORE_IP" "PROD AH TXT"
+      ;;
+    *)
+      echo -e "${YELLOW}⚠️  跳過 Pod $POD，環境 $CURRENT_CONTEXT 不在指定的檢查範圍內${NC}"
+      return 1
+      ;;
+  esac
 }
 
 get_random_pod() {
@@ -100,13 +84,13 @@ get_random_pod() {
   CHECK_INFO_POD=$(kubectl get pod -n $CURRENT_NAMESPACE --no-headers -o 'custom-columns=NAME:.metadata.name' | grep checkinfo | shuf -n 1)
 }
 
-check_pod_readwrite_volumeMount() {
+check_pod_volume_config() {
   local POD="$1"
   local CONTAINER_NAME="$2"
   
   # 檢查參數
   if [ -z "$POD" ]; then
-    echo -e "$無法找到符合搜尋條件的 Pod 在命名空間 $CURRENT_NAMESPACE 中${NC}"
+    echo -e "無法找到 POD 在命名空間 $CURRENT_NAMESPACE 中${NC}"
     return 1
   fi
   
@@ -127,6 +111,7 @@ check_pod_readwrite_volumeMount() {
   
   echo ""
   echo -e "${BLUE}────────────────────────────────────────────────────────────────────────────────${NC}"
+  sleep 1 # 暫停一秒以便於閱讀輸出
 }
 
 # 檢查 Pod 的檔案系統使用情況
@@ -136,22 +121,22 @@ main() {
   echo -e "${YELLOW}═══════════════════════════════════════════════════════════════════════════════════${NC}"
   # read-write
   pod_df "${EAGLE_POD}" "go"
-  check_pod_readwrite_volumeMount "$EAGLE_POD" "go"
+  check_pod_volume_config "$EAGLE_POD" "go"
   echo ""
   pod_df "${WOLF_POD}" "go"
-  check_pod_readwrite_volumeMount "$WOLF_POD" "go"
+  check_pod_volume_config "$WOLF_POD" "go"
   echo ""
   pod_df "${IPL_CTL_BACKGROUND_POD}" "php"
-  check_pod_readwrite_volumeMount "${IPL_CTL_BACKGROUND_POD}" "php"
+  check_pod_volume_config "${IPL_CTL_BACKGROUND_POD}" "php"
   echo ""
   pod_df "${CTL_BLISSEY_POD}" "php"
-  check_pod_readwrite_volumeMount "${CTL_BLISSEY_POD}" "php"
+  check_pod_volume_config "${CTL_BLISSEY_POD}" "php"
   echo ""
   pod_df "${HALL_BLISSEY_POD}" "php"
-  check_pod_readwrite_volumeMount "${HALL_BLISSEY_POD}" "php"
+  check_pod_volume_config "${HALL_BLISSEY_POD}" "php"
   echo ""
   pod_df "${INTERNAL_BLISSEY_POD}" "php"
-  check_pod_readwrite_volumeMount "${INTERNAL_BLISSEY_POD}" "php"
+  check_pod_volume_config "${INTERNAL_BLISSEY_POD}" "php"
   echo ""
   # read-only
   pod_df "${CHECK_INFO_POD}" "php"
