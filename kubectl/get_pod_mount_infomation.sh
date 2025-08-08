@@ -21,7 +21,7 @@ readonly PROD_AH_TXT_FILESTORE_IP="172.18.2.194"
 readonly PROD_CONTEXT="gke_gcp-20220425-006_asia-east1_bbin-interface-prod"
 
 # 對 Pod 使用客製化的 df 指令，獲取想要的資訊
-pod_df() {
+get_pod_df_infomation() {
   local POD="$1"
   local CONTAINER_NAME="$2"
 
@@ -84,7 +84,7 @@ get_random_pod() {
   CHECK_INFO_POD=$(kubectl get pod -n $CURRENT_NAMESPACE --no-headers -o 'custom-columns=NAME:.metadata.name' | grep checkinfo | shuf -n 1)
 }
 
-check_pod_volume_config() {
+get_pod_volume_config() {
   local POD="$1"
   local CONTAINER_NAME="$2"
 
@@ -114,12 +114,11 @@ check_pod_volume_config() {
   sleep 1 # 暫停一秒以便於閱讀輸出
 }
 
-# 多型函數實作介面
-check_mount_interface() {
+get_pod_mount_infomation_interface() {
   local POD="$1"
   local CONTAINER_NAME="$2"
-  pod_df "$POD" "$CONTAINER_NAME"
-  check_pod_volume_config "$POD" "$CONTAINER_NAME"
+  get_pod_df_infomation "$POD" "$CONTAINER_NAME"
+  get_pod_volume_config "$POD" "$CONTAINER_NAME"
 }
 
 # 檢查 Pod 的檔案系統使用情況
@@ -128,28 +127,28 @@ main() {
   echo -e "${YELLOW}🚀 開始檢查 Pod Volume 掛載和磁碟使用情況${NC}"
   echo -e "${YELLOW}═══════════════════════════════════════════════════════════════════════════════════${NC}"
   # read-write
-  check_mount_interface "${EAGLE_POD}" "go"
+  get_pod_mount_infomation_interface "${EAGLE_POD}" "go"
   echo ""
-  check_mount_interface "${WOLF_POD}" "go"
+  get_pod_mount_infomation_interface "${WOLF_POD}" "go"
   echo ""
-  check_mount_interface "${IPL_CTL_BACKGROUND_POD}" "php"
+  get_pod_mount_infomation_interface "${IPL_CTL_BACKGROUND_POD}" "php"
   echo ""
-  check_mount_interface "${CTL_BLISSEY_POD}" "php"
+  get_pod_mount_infomation_interface "${CTL_BLISSEY_POD}" "php"
   echo ""
-  check_mount_interface "${HALL_BLISSEY_POD}" "php"
+  get_pod_mount_infomation_interface "${HALL_BLISSEY_POD}" "php"
   echo ""
-  check_mount_interface "${INTERNAL_BLISSEY_POD}" "php"
+  get_pod_mount_infomation_interface "${INTERNAL_BLISSEY_POD}" "php"
   echo ""
   # read-only
-  check_mount_interface "${CHECK_INFO_POD}" "php"
+  get_pod_mount_infomation_interface "${CHECK_INFO_POD}" "php"
   echo ""
-  check_mount_interface "${BAMBI_OFFERCENTER_POD}" "app"
+  get_pod_mount_infomation_interface "${BAMBI_OFFERCENTER_POD}" "app"
   echo ""
-  check_mount_interface "${AIO_API_POD}" "php"
+  get_pod_mount_infomation_interface "${AIO_API_POD}" "php"
   echo ""
-  check_mount_interface "${AIO_WEB_POD}" "php"
+  get_pod_mount_infomation_interface "${AIO_WEB_POD}" "php"
   echo ""
-  check_mount_interface "${BALL_MEMBER_POD}" "php"
+  get_pod_mount_infomation_interface "${BALL_MEMBER_POD}" "php"
   echo -e "${YELLOW}✅ 檢查完成！${NC}"
 }
 
