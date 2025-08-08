@@ -41,29 +41,6 @@ function get_pdb() {
   kubectl get pdb --context="$CURRENT_CONTEXT" -n "$CURRENT_NAMESPACE" -o 'custom-columns=NAME:.metadata.name,STATUS:.status.conditions[-1].type,AGE:.metadata.creationTimestamp'
 }
 
-get_pod() {
-  local ASSIGNATION_CONTEXT="$1"
-  local ASSIGNATION_NAMESPACE="$2"
-  local SEARCH_KEYWORD="$3"
-
-  assign_context_and_namespace "$ASSIGNATION_CONTEXT" "$ASSIGNATION_NAMESPACE"
-
-  echo -e "${BLUE}Listing pods in context: $CURRENT_CONTEXT, namespace: $CURRENT_NAMESPACE${NC}"
-  kubectl get pod --context="$CURRENT_CONTEXT" -n "$CURRENT_NAMESPACE" -o 'custom-columns=NAME:.metadata.name,STATUS:.status.phase,AGE:.metadata.creationTimestamp'
-
-  kubectl get pod --context="$CURRENT_CONTEXT" -n "$CURRENT_NAMESPACE" -o 'custom-columns=NAME:.metadata.name,STATUS:.status.phase,AGE:.metadata.creationTimestamp' | grep "$SEARCH_KEYWORD" | awk '{print $1}' | xargs -r kubectl describe pod --context="$CURRENT_CONTEXT" -n "$CURRENT_NAMESPACE"
-}
-
-get_service() {
-  local ASSIGNATION_CONTEXT="$1"
-  local ASSIGNATION_NAMESPACE="$2"
-
-  assign_context_and_namespace "$ASSIGNATION_CONTEXT" "$ASSIGNATION_NAMESPACE"
-
-  echo -e "${BLUE}Listing services in context: $CURRENT_CONTEXT, namespace: $CURRENT_NAMESPACE${NC}"
-  kubectl get service --context="$CURRENT_CONTEXT" -n "$CURRENT_NAMESPACE" -o 'custom-columns=NAME:.metadata.name,TYPE:.spec.type,CLUSTER-IP:.spec.clusterIP,EXTERNAL-IP:.status.loadBalancer.ingress[*].ip'
-}
-
 function get_all_pdb() {
   local CURRENT_CONTEXT="$1"
 

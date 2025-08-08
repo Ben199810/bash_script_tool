@@ -15,9 +15,9 @@ function current_namespace() {
 }
 
 function switch_context() {
-  KUBE_CONTEXT=$1
-  if [ -n "$KUBE_CONTEXT" ]; then
-    kubectl config use-context "$KUBE_CONTEXT"
+  CONTEXT=$1
+  if [ -n "$CONTEXT" ]; then
+    kubectl config use-context "$CONTEXT"
   else
     echo -e "${RED}未選擇 Kubernetes Context，退出。${NC}"
     exit 1
@@ -25,11 +25,11 @@ function switch_context() {
 }
 
 function switch_namespace() {
-  KUBE_NAMESPACE=$1
-  if [ -n "$KUBE_NAMESPACE" ]; then
+  NAMESPACE=$1
+  if [ -n "$NAMESPACE" ]; then
     # 去除前綴 "namespace/"
-    KUBE_NAMESPACE=${KUBE_NAMESPACE#namespace/}
-    kubectl config set-context --current --namespace="$KUBE_NAMESPACE"
+    NAMESPACE=${NAMESPACE#namespace/}
+    kubectl config set-context --current --namespace="$NAMESPACE"
   else
     echo -e "${RED}未選擇命名空間，退出。${NC}"
     exit 1
@@ -43,10 +43,10 @@ switch_context_interface(){
 
   read -p "你想要切換 Kubernetes Context 嗎? (y/n): " SWITCH_CONTEXT
   if [[ "$SWITCH_CONTEXT" =~ ^[Yy]$ ]]; then
-    KUBE_CONTEXT=$(kubectl config get-contexts -o name | fzf --prompt="Select a context: ")
-    switch_context $KUBE_CONTEXT
-    KUBE_NAMESPACE=$(kubectl get namespaces -o name | fzf --prompt="Select a namespace: ")
-    switch_namespace $KUBE_NAMESPACE
+    CONTEXT=$(kubectl config get-contexts -o name | fzf --prompt="Select a context: ")
+    switch_context $CONTEXT
+    NAMESPACE=$(kubectl get namespaces -o name | fzf --prompt="Select a namespace: ")
+    switch_namespace $NAMESPACE
   else
     echo -e "${YELLOW}跳過切換。${NC}"
   fi

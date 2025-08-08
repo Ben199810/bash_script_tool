@@ -109,7 +109,7 @@ get_pod_volume_config() {
   
   echo ""
   echo -e "${BLUE}────────────────────────────────────────────────────────────────────────────────${NC}"
-  sleep 1 # 暫停一秒以便於閱讀輸出
+  sleep 1
 }
 
 get_pod_mount_infomation_interface() {
@@ -119,12 +119,10 @@ get_pod_mount_infomation_interface() {
   get_pod_volume_config "$POD" "$CONTAINER_NAME"
 }
 
-# 檢查 Pod 的檔案系統使用情況
 main() {
   get_random_pod
   echo -e "${YELLOW}🚀 開始檢查 Pod Volume 掛載和磁碟使用情況${NC}"
   echo -e "${YELLOW}═══════════════════════════════════════════════════════════════════════════════════${NC}"
-  # read-write
   get_pod_mount_infomation_interface "${EAGLE_POD}" "go"
   echo ""
   get_pod_mount_infomation_interface "${WOLF_POD}" "go"
@@ -137,7 +135,6 @@ main() {
   echo ""
   get_pod_mount_infomation_interface "${INTERNAL_BLISSEY_POD}" "php"
   echo ""
-  # read-only
   get_pod_mount_infomation_interface "${CHECK_INFO_POD}" "php"
   echo ""
   get_pod_mount_infomation_interface "${BAMBI_OFFERCENTER_POD}" "app"
