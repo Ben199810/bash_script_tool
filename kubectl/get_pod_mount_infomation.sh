@@ -1,9 +1,7 @@
 #!/bin/bash
 source ../modules/switch_kubernetes_context.sh
 
-switch_context_interface # 切換 Kubernetes Context 和 Namespace 的介面實作
-
-# 定義常數
+switch_context_interface
 
 # DEV/QA 環境
 readonly DEV_QA_FILESTORE_IP="172.18.0.106"
