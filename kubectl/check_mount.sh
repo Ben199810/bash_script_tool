@@ -27,7 +27,7 @@ pod_df() {
 
   # 檢查是否有找到符合條件的 Pod，如果沒有找到，則輸出提示信息並返回錯誤碼
   if [ -z "$POD" ]; then
-    echo -e "${YELLOW}無法找到 POD 在命名空間 $CURRENT_NAMESPACE 中${NC}"
+    echo -e "${RED}查看磁碟使用狀況錯誤：無法找到 POD 在命名空間 $CURRENT_NAMESPACE 中${NC}"
     return 1
   fi
 
@@ -87,10 +87,10 @@ get_random_pod() {
 check_pod_volume_config() {
   local POD="$1"
   local CONTAINER_NAME="$2"
-  
+
   # 檢查參數
   if [ -z "$POD" ]; then
-    echo -e "無法找到 POD 在命名空間 $CURRENT_NAMESPACE 中${NC}"
+    echo -e "${RED}檢查 volume 配置錯誤：無法找到 POD 在命名空間 $CURRENT_NAMESPACE 中${NC}"
     return 1
   fi
   
@@ -114,40 +114,42 @@ check_pod_volume_config() {
   sleep 1 # 暫停一秒以便於閱讀輸出
 }
 
+# 多型函數實作介面
+check_mount_interface() {
+  local POD="$1"
+  local CONTAINER_NAME="$2"
+  pod_df "$POD" "$CONTAINER_NAME"
+  check_pod_volume_config "$POD" "$CONTAINER_NAME"
+}
+
 # 檢查 Pod 的檔案系統使用情況
 main() {
   get_random_pod
   echo -e "${YELLOW}🚀 開始檢查 Pod Volume 掛載和磁碟使用情況${NC}"
   echo -e "${YELLOW}═══════════════════════════════════════════════════════════════════════════════════${NC}"
   # read-write
-  pod_df "${EAGLE_POD}" "go"
-  check_pod_volume_config "$EAGLE_POD" "go"
+  check_mount_interface "${EAGLE_POD}" "go"
   echo ""
-  pod_df "${WOLF_POD}" "go"
-  check_pod_volume_config "$WOLF_POD" "go"
+  check_mount_interface "${WOLF_POD}" "go"
   echo ""
-  pod_df "${IPL_CTL_BACKGROUND_POD}" "php"
-  check_pod_volume_config "${IPL_CTL_BACKGROUND_POD}" "php"
+  check_mount_interface "${IPL_CTL_BACKGROUND_POD}" "php"
   echo ""
-  pod_df "${CTL_BLISSEY_POD}" "php"
-  check_pod_volume_config "${CTL_BLISSEY_POD}" "php"
+  check_mount_interface "${CTL_BLISSEY_POD}" "php"
   echo ""
-  pod_df "${HALL_BLISSEY_POD}" "php"
-  check_pod_volume_config "${HALL_BLISSEY_POD}" "php"
+  check_mount_interface "${HALL_BLISSEY_POD}" "php"
   echo ""
-  pod_df "${INTERNAL_BLISSEY_POD}" "php"
-  check_pod_volume_config "${INTERNAL_BLISSEY_POD}" "php"
+  check_mount_interface "${INTERNAL_BLISSEY_POD}" "php"
   echo ""
   # read-only
-  pod_df "${CHECK_INFO_POD}" "php"
+  check_mount_interface "${CHECK_INFO_POD}" "php"
   echo ""
-  pod_df "${BAMBI_OFFERCENTER_POD}" "app"
+  check_mount_interface "${BAMBI_OFFERCENTER_POD}" "app"
   echo ""
-  pod_df "${AIO_API_POD}" "php"
+  check_mount_interface "${AIO_API_POD}" "php"
   echo ""
-  pod_df "${AIO_WEB_POD}" "php"
+  check_mount_interface "${AIO_WEB_POD}" "php"
   echo ""
-  pod_df "${BALL_MEMBER_POD}" "php"
+  check_mount_interface "${BALL_MEMBER_POD}" "php"
   echo -e "${YELLOW}✅ 檢查完成！${NC}"
 }
 
