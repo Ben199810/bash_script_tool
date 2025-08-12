@@ -1,5 +1,5 @@
 #!/bin/bash
-source ../modules/switch_kubernetes_context.sh
+source ../../modules/switch_kubernetes_context.sh
 
 switch_context_interface
 
