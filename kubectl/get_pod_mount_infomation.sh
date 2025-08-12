@@ -19,7 +19,7 @@ readonly PROD_AH_TXT_FILESTORE_IP="172.18.2.194"
 readonly PROD_CONTEXT="gke_gcp-20220425-006_asia-east1_bbin-interface-prod"
 
 # 對 Pod 使用客製化的 df 指令，獲取想要的資訊
-get_pod_df_infomation() {
+get_pod_df_information() {
   local POD="$1"
   local CONTAINER_NAME="$2"
 
@@ -112,10 +112,10 @@ get_pod_volume_config() {
   sleep 1
 }
 
-get_pod_mount_infomation_interface() {
+get_pod_mount_information_interface() {
   local POD="$1"
   local CONTAINER_NAME="$2"
-  get_pod_df_infomation "$POD" "$CONTAINER_NAME"
+  get_pod_df_information "$POD" "$CONTAINER_NAME"
   get_pod_volume_config "$POD" "$CONTAINER_NAME"
 }
 
@@ -123,27 +123,27 @@ main() {
   get_random_pod
   echo -e "${YELLOW}🚀 開始檢查 Pod Volume 掛載和磁碟使用情況${NC}"
   echo -e "${YELLOW}═══════════════════════════════════════════════════════════════════════════════════${NC}"
-  get_pod_mount_infomation_interface "${EAGLE_POD}" "go"
+  get_pod_mount_information_interface "${EAGLE_POD}" "go"
   echo ""
-  get_pod_mount_infomation_interface "${WOLF_POD}" "go"
+  get_pod_mount_information_interface "${WOLF_POD}" "go"
   echo ""
-  get_pod_mount_infomation_interface "${IPL_CTL_BACKGROUND_POD}" "php"
+  get_pod_mount_information_interface "${IPL_CTL_BACKGROUND_POD}" "php"
   echo ""
-  get_pod_mount_infomation_interface "${CTL_BLISSEY_POD}" "php"
+  get_pod_mount_information_interface "${CTL_BLISSEY_POD}" "php"
   echo ""
-  get_pod_mount_infomation_interface "${HALL_BLISSEY_POD}" "php"
+  get_pod_mount_information_interface "${HALL_BLISSEY_POD}" "php"
   echo ""
-  get_pod_mount_infomation_interface "${INTERNAL_BLISSEY_POD}" "php"
+  get_pod_mount_information_interface "${INTERNAL_BLISSEY_POD}" "php"
   echo ""
-  get_pod_mount_infomation_interface "${CHECK_INFO_POD}" "php"
+  get_pod_mount_information_interface "${CHECK_INFO_POD}" "php"
   echo ""
-  get_pod_mount_infomation_interface "${BAMBI_OFFERCENTER_POD}" "app"
+  get_pod_mount_information_interface "${BAMBI_OFFERCENTER_POD}" "app"
   echo ""
-  get_pod_mount_infomation_interface "${AIO_API_POD}" "php"
+  get_pod_mount_information_interface "${AIO_API_POD}" "php"
   echo ""
-  get_pod_mount_infomation_interface "${AIO_WEB_POD}" "php"
+  get_pod_mount_information_interface "${AIO_WEB_POD}" "php"
   echo ""
-  get_pod_mount_infomation_interface "${BALL_MEMBER_POD}" "php"
+  get_pod_mount_information_interface "${BALL_MEMBER_POD}" "php"
   echo -e "${YELLOW}✅ 檢查完成！${NC}"
 }
 
