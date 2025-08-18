@@ -1,5 +1,4 @@
 #!/bin/bash
-source ../modules/default.sh
 
 declare CURRENT_CONTEXT=""
 declare CURRENT_NAMESPACE=""
