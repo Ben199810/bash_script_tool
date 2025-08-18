@@ -54,7 +54,6 @@ start_iap_tunnel() {
   gcloud compute ssh "$INSTANCE_NAME" --zone="$ZONE" --tunnel-through-iap
 }
 
-
 use_iap_tunnel_port_forwarding_memorystore () {
   select_gce_instance
   select_memorystore_instance
@@ -70,8 +69,6 @@ use_iap_tunnel_port_forwarding_memorystore () {
 
   gcloud compute ssh "$JUMP_INSTANCE_NAME" --zone="$JUMP_ZONE" --tunnel-through-iap -- -N -L "$LOCAL_PORT:$MEMORYSTORE_INSTANCE_HOST:$MEMORYSTORE_INSTANCE_PORT"
 }
-
-
 
 ask_user_and_connect() {
   local OPERATION_ARRAY=(

@@ -1,5 +1,7 @@
 #!/bin/bash
-source ../../modules/switch_kubernetes_context.sh
+DIR="$(dirname $0)"
+source "$DIR/../../modules/default.sh"
+source "$DIR/../../modules/switch_kubernetes_context.sh"
 
 switch_context_interface
 
