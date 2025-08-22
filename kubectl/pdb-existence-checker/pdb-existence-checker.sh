@@ -1,13 +1,13 @@
 #!/bin/bash
 DIR="$(dirname $0)"
 source "$DIR/../../modules/default.sh"
-# source "$DIR/../../modules/switch_kubernetes_context.sh"
+source "$DIR/../../modules/switch_kubernetes_context.sh"
 
 # 全域變數
 SEARCH_KEYWORD=""
 
 # 函數：請使用者輸入要搜尋的關鍵字
-get_search_keyword() {
+prompts_search_keyword() {
     echo -e "${BLUE}=== PDB 存在檢查器 ===${NC}"
     echo ""
     
@@ -78,12 +78,12 @@ search_pdb() {
     fi
 }
 
-# switch_context_interface
+switch_context_interface
 
 # 主程式
 main() {
     # 取得搜尋關鍵字
-    get_search_keyword
+    prompts_search_keyword
     
     # 搜尋 PDB
     search_pdb "$SEARCH_KEYWORD"
