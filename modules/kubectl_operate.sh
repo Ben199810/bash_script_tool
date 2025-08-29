@@ -33,31 +33,6 @@ function get_namespace() {
   kubectl get namespace --context="$CURRENT_CONTEXT" -o 'custom-columns=NAME:.metadata.name,STATUS:.status.phase'
 }
 
-function get_pdb() {
-  local CURRENT_CONTEXT="$1"
-  local CURRENT_NAMESPACE="$2"
-
-  echo -e "${BLUE}Listing pod disruption budgets in context: $CURRENT_CONTEXT, namespace: $CURRENT_NAMESPACE${NC}"
-  kubectl get pdb --context="$CURRENT_CONTEXT" -n "$CURRENT_NAMESPACE" -o 'custom-columns=NAME:.metadata.name,STATUS:.status.conditions[-1].type,AGE:.metadata.creationTimestamp'
-}
-
-function get_all_pdb() {
-  local CURRENT_CONTEXT="$1"
-
-  echo -e "${BLUE}Listing all pod disruption budgets in context: $CURRENT_CONTEXT${NC}"
-  kubectl get pdb --context="$CURRENT_CONTEXT" -A -o 'custom-columns=NAME:.metadata.name,STATUS:.status.conditions[-1].type,AGE:.metadata.creationTimestamp'
-}
-
-function describe_pdb() {
-  local CURRENT_CONTEXT="$1"
-  local CURRENT_NAMESPACE="$2"
-  # fzf
-  local PDB_NAME=$(kubectl get pdb --context="$CURRENT_CONTEXT" -n "$CURRENT_NAMESPACE" -o 'custom-columns=NAME:.metadata.name' | fzf --height 40% --reverse --inline-info --header="Select a Pod Disruption Budget to describe")
-
-  echo -e "${BLUE}Describing Pod Disruption Budget: $PDB_NAME in context: $CURRENT_CONTEXT, namespace: $CURRENT_NAMESPACE${NC}"
-  kubectl describe pdb "$PDB_NAME" --context="$CURRENT_CONTEXT" -n "$CURRENT_NAMESPACE"
-}
-
 function describe_backendConfig() {
   local ASSIGNATION_CONTEXT="$1"
   local ASSIGNATION_NAMESPACE="$2"

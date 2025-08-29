@@ -36,20 +36,32 @@ function switch_namespace() {
 }
 
 # 實作切換 Kubernetes Context 和 Namespace 的介面流程
-switch_context_interface(){
+function switch_context_interface(){
   get_current_context
-  get_current_namespace
-
   read -p "你想要切換 Kubernetes Context 嗎? (y/n): " SWITCH_CONTEXT
   if [[ "$SWITCH_CONTEXT" =~ ^[Yy]$ ]]; then
     CONTEXT=$(kubectl config get-contexts -o name | fzf --prompt="Select a context: ")
     switch_context $CONTEXT
+    echo -e "${GREEN}已切換到 Kubernetes Context: $CONTEXT${NC}"
+    echo ""
+  else
+    echo -e "${YELLOW}跳過切換 Kubernetes Context。${NC}"
+    echo ""
+  fi
+
+  get_current_namespace
+  read -p "你想要切換 Kubernetes Namespace 嗎? (y/n): " SWITCH_NAMESPACE
+  if [[ "$SWITCH_NAMESPACE" =~ ^[Yy]$ ]]; then
     NAMESPACE=$(kubectl get namespaces -o name | fzf --prompt="Select a namespace: ")
     switch_namespace $NAMESPACE
+    echo -e "${GREEN}已切換到 Kubernetes Namespace: $NAMESPACE${NC}"
+    echo ""
   else
-    echo -e "${YELLOW}跳過切換。${NC}"
+    echo -e "${YELLOW}跳過切換 Kubernetes Namespace。${NC}"
+    echo ""
   fi
 
   get_current_context
   get_current_namespace
+  echo ""
 }
