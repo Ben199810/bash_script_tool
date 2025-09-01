@@ -4,28 +4,10 @@ source "$DIR/../../modules/default.sh"
 source "$DIR/../../modules/kubernetes.sh"
 source "$DIR/../../modules/switch_kubernetes_context.sh"
 
-# 全域變數
-SEARCH_KEYWORD=""
+echo -e "${BLUE}=== PDB 存在檢查器 ===${NC}"
+echo ""
 
-# 函數：請使用者輸入要搜尋的關鍵字
-prompts_search_keyword() {
-    echo -e "${BLUE}=== PDB 存在檢查器 ===${NC}"
-    echo ""
-    
-    while [[ -z "$SEARCH_KEYWORD" ]]; do
-        echo -en "${YELLOW}請輸入要搜尋的 PDB 關鍵字: ${NC}"
-        read -r SEARCH_KEYWORD
-        
-        if [[ -z "$SEARCH_KEYWORD" ]]; then
-            echo -e "${RED}❌ 關鍵字不能為空，請重新輸入${NC}"
-            echo ""
-        fi
-    done
-    
-    echo ""
-    echo -e "${GREEN}✅ 搜尋關鍵字: $SEARCH_KEYWORD${NC}"
-    echo ""
-}
+prompts_search_keyword
 
 # 函數：搜尋 PDB
 search_pdb() {
@@ -63,6 +45,7 @@ search_pdb() {
         echo -e "${GREEN}✅ 找到 $(echo "$MATCHING_PDBS" | wc -l) 個符合的 PDB:${NC}"
         echo ""
         echo "$MATCHING_PDBS" | while read -r LINE; do
+        echo $LINE
             local NAMESPACE=$(echo "$LINE" | awk '{print $1}')
             local NAME=$(echo "$LINE" | awk '{print $2}')
             local MIN_AVAILABLE=$(echo "$LINE" | awk '{print $3}')
