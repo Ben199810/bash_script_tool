@@ -15,8 +15,6 @@ main() {
     get_all_pdbs "$SEARCH_KEYWORD"
     # 搜尋 PDB
     search_pdb "$PDB_LIST"
-    # 顯示 PDB 詳細資訊
-    display_pdb_details "$MATCHING_PDBS"
     echo -e "${BLUE}🎉 搜尋完成！${NC}"
 }
 
