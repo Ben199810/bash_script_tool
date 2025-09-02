@@ -1,9 +1,6 @@
 #!/bin/bash
 DIR="$(dirname $0)"
-source "$DIR/../../modules/default.sh"
-source "$DIR/../../modules/switch_kubernetes_context.sh"
-
-switch_context_interface
+source "$DIR/default.sh"
 
 # DEV/QA 環境
 readonly DEV_QA_FILESTORE_IP="172.18.0.106"
@@ -122,6 +119,7 @@ get_pod_mount_information_interface() {
 }
 
 main() {
+  switch_context_interface
   get_random_pod
   echo -e "${YELLOW}🚀 開始檢查 Pod Volume 掛載和磁碟使用情況${NC}"
   echo -e "${YELLOW}═══════════════════════════════════════════════════════════════════════════════════${NC}"
