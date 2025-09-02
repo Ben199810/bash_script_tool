@@ -8,8 +8,9 @@ function main() {
   # 詢問是否查詢所有命名空間
   ask_query_all_namespaces
   # 獲取所有 POD 的狀態
-  get_all_pods
-  display_pod_details "$POD_LIST"
+  RESOURCE_TYPE="pod"
+  get_selected_kubernetes_resource
+  display_pod_details "$RESOURCE_ARRAY"
 }
 
 main

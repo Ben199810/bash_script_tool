@@ -3,7 +3,6 @@ source "$DIR/../../modules/default.sh"
 source "$DIR/../../modules/kubernetes.sh"
 source "$DIR/../../modules/switch_kubernetes_context.sh"
 
-declare PDB_LIST=""
 declare MATCHING_PDBS=""
 
 function get_all_pdbs(){
@@ -22,12 +21,12 @@ function get_all_pdbs(){
 }
 
 function search_pdb(){
-    PDB_LIST="$1"
+    local PDBS="$1"
 
     echo -e "${BLUE}🔍 搜尋包含 '$SEARCH_KEYWORD' 的 PDB...${NC}"
     echo ""
-    
-    MATCHING_PDBS=$(echo "$PDB_LIST" | grep -i "$SEARCH_KEYWORD")
+
+    local MATCHING_PDBS=$(echo "$PDBS" | grep -i "$SEARCH_KEYWORD")
     if [[ -z "$MATCHING_PDBS" ]]; then
         echo -e "${YELLOW}⚠️  沒有找到包含 '$SEARCH_KEYWORD' 的 PDB${NC}"
         exit 0

@@ -3,13 +3,6 @@ source "$DIR/../../modules/default.sh"
 source "$DIR/../../modules/kubernetes.sh"
 source "$DIR/../../modules/switch_kubernetes_context.sh"
 
-POD_LIST=""
-
-function get_all_pods() {
-  local NAMESPACE_OPTION=$(get_namespace_option)
-  POD_LIST=$(kubectl get pods $NAMESPACE_OPTION --no-headers 2>/dev/null)
-}
-
 function display_pod_details() {
   local PODS="$1"
 
