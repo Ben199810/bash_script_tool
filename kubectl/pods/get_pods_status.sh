@@ -9,7 +9,7 @@ function main() {
   ask_query_all_namespaces
   # 獲取所有 POD 的狀態
   get_all_pods
-  get_pod_status
+  display_pod_details "$POD_LIST"
 }
 
 main

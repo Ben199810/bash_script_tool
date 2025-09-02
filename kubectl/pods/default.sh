@@ -10,21 +10,17 @@ function get_all_pods() {
   POD_LIST=$(kubectl get pods $NAMESPACE_OPTION --no-headers 2>/dev/null)
 }
 
-function get_pod_status() {
-  local NAMESPACE
-  local POD_NAME
-  local READY
-  local STATUS
-  local RESTARTS
+function display_pod_details() {
+  local PODS="$1"
 
   echo -e "${BLUE}🔍 POD 詳細資訊:${NC}"
   if is_query_all_namespaces; then
-    echo "$POD_LIST" | while read -r LINE; do
-      NAMESPACE=$(echo "$LINE" | awk '{print $1}')
-      POD_NAME=$(echo "$LINE" | awk '{print $2}')
-      READY=$(echo "$LINE" | awk '{print $3}')
-      STATUS=$(echo "$LINE" | awk '{print $4}')
-      RESTARTS=$(echo "$LINE" | awk '{print $5}')
+    echo "$PODS" | while read -r LINE; do
+      local NAMESPACE=$(echo "$LINE" | awk '{print $1}')
+      local POD_NAME=$(echo "$LINE" | awk '{print $2}')
+      local READY=$(echo "$LINE" | awk '{print $3}')
+      local STATUS=$(echo "$LINE" | awk '{print $4}')
+      local RESTARTS=$(echo "$LINE" | awk '{print $5}')
 
       echo -e "${GREEN}📋 POD 名稱:${NC} $POD_NAME"
       echo -e "${GREEN}📂 命名空間:${NC} $NAMESPACE"
@@ -34,11 +30,11 @@ function get_pod_status() {
       echo ""
     done
   else
-    echo "$POD_LIST" | while read -r LINE; do
-      POD_NAME=$(echo "$LINE" | awk '{print $1}')
-      READY=$(echo "$LINE" | awk '{print $2}')
-      STATUS=$(echo "$LINE" | awk '{print $3}')
-      RESTARTS=$(echo "$LINE" | awk '{print $4}')
+    echo "$PODS" | while read -r LINE; do
+      local POD_NAME=$(echo "$LINE" | awk '{print $1}')
+      local READY=$(echo "$LINE" | awk '{print $2}')
+      local STATUS=$(echo "$LINE" | awk '{print $3}')
+      local RESTARTS=$(echo "$LINE" | awk '{print $4}')
 
       echo -e "${GREEN}📋 POD 名稱:${NC} $POD_NAME"
       echo -e "${GREEN}✅ 就緒狀態:${NC} $READY"
