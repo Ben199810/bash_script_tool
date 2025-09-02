@@ -8,6 +8,8 @@ echo ""
 main(){
   # 切換 Kubernetes context
   switch_context_interface
+  # 詢問是否查詢所有命名空間
+  ask_query_all_namespaces
   # 取得所有 PDB
   get_all_pdbs "$SEARCH_KEYWORD"
   # 顯示 PDB 詳細資訊
