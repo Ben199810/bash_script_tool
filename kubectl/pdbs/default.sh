@@ -3,23 +3,6 @@ source "$DIR/../../modules/default.sh"
 source "$DIR/../../modules/kubernetes.sh"
 source "$DIR/../../modules/switch_kubernetes_context.sh"
 
-declare MATCHING_PDBS=""
-
-function get_all_pdbs(){
-    local NAMESPACE_OPTION=$(get_namespace_option)
-    PDB_LIST=$(kubectl get pdb $NAMESPACE_OPTION --no-headers 2>/dev/null)
-
-    if [[ $? -ne 0 ]]; then
-        echo -e "${RED}❌ 無法取得 PDB 列表，請檢查 kubectl 連線${NC}"
-        return 1
-    fi
-    
-    if [[ -z "$PDB_LIST" ]]; then
-        echo -e "${YELLOW}⚠️  叢集中沒有找到任何 PDB${NC}"
-        return 0
-    fi
-}
-
 function search_pdb(){
     local PDBS="$1"
 
@@ -28,12 +11,12 @@ function search_pdb(){
 
     local MATCHING_PDBS=$(echo "$PDBS" | grep -i "$SEARCH_KEYWORD")
     if [[ -z "$MATCHING_PDBS" ]]; then
-        echo -e "${YELLOW}⚠️  沒有找到包含 '$SEARCH_KEYWORD' 的 PDB${NC}"
+        echo -e "${YELLOW}⚠️ 沒有找到包含 '$SEARCH_KEYWORD' 的 PDB${NC}"
         exit 0
     else
         echo -e "${GREEN}✅ 找到 $(echo "$MATCHING_PDBS" | wc -l) 個符合的 PDB:${NC}"
         echo ""
-        echo "$MATCHING_PDBS"
+        display_pdb_details "$MATCHING_PDBS"
     fi
 }
 
@@ -41,7 +24,7 @@ function display_pdb_details(){
     local PDBS="$1"
 
     if [[ -z "$PDBS" ]]; then
-        echo -e "${YELLOW}⚠️  沒有找到任何 PDB 詳細資訊${NC}"
+        echo -e "${YELLOW}⚠️ 沒有找到任何 PDB 詳細資訊${NC}"
         return
     fi
 
