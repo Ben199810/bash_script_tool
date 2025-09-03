@@ -29,6 +29,7 @@ function display_pdb_details(){
     fi
 
     echo -e "${BLUE}🔍 PDB 詳細資訊:${NC}"
+    echo ""
     if is_query_all_namespaces; then
       echo "$PDBS" | while read -r LINE; do
           local NAMESPACE=$(echo "$LINE" | awk '{print $1}')

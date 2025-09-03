@@ -5,15 +5,18 @@
 # 詢問是否查詢所有命名空間
 function ask_query_all_namespaces() {
     read -r -p "是否查詢所有命名空間？(y/n): " QUERY_ALL_NAMESPACES
-    
     # 標準化輸入：將輸入轉換為小寫並檢查是否為 y 或 yes
     case "${QUERY_ALL_NAMESPACES}" in
         y|yes)
             QUERY_ALL_NAMESPACES="true"
+            echo -e "${GREEN}✅ 將查詢所有命名空間${NC}"
+            echo ""
             return 0
             ;;
         *)
             QUERY_ALL_NAMESPACES="false"
+            echo -e "${YELLOW}⚠️ 將不查詢所有命名空間${NC}"
+            echo ""
             return 1
             ;;
     esac

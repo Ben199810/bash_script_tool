@@ -14,12 +14,14 @@ function display_pod_details() {
       local READY=$(echo "$LINE" | awk '{print $3}')
       local STATUS=$(echo "$LINE" | awk '{print $4}')
       local RESTARTS=$(echo "$LINE" | awk '{print $5}')
+      local AGE=$(echo "$LINE" | awk '{print $6}')
 
       echo -e "${GREEN}📋 POD 名稱:${NC} $POD_NAME"
       echo -e "${GREEN}📂 命名空間:${NC} $NAMESPACE"
       echo -e "${GREEN}✅ 就緒狀態:${NC} $READY"
       echo -e "${GREEN}📊 狀態:${NC} $STATUS"
       echo -e "${GREEN}🔄 重啟次數:${NC} $RESTARTS"
+      echo -e "${GREEN}⏳ 年齡:${NC} $AGE"
       echo ""
     done
   else
@@ -28,11 +30,13 @@ function display_pod_details() {
       local READY=$(echo "$LINE" | awk '{print $2}')
       local STATUS=$(echo "$LINE" | awk '{print $3}')
       local RESTARTS=$(echo "$LINE" | awk '{print $4}')
+      local AGE=$(echo "$LINE" | awk '{print $5}')
 
       echo -e "${GREEN}📋 POD 名稱:${NC} $POD_NAME"
       echo -e "${GREEN}✅ 就緒狀態:${NC} $READY"
       echo -e "${GREEN}📊 狀態:${NC} $STATUS"
       echo -e "${GREEN}🔄 重啟次數:${NC} $RESTARTS"
+      echo -e "${GREEN}⏳ 年齡:${NC} $AGE"
       echo ""
     done
   fi

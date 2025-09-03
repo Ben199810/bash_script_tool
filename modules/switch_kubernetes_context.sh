@@ -36,7 +36,7 @@ function switch_namespace(){
 }
 
 # 實作切換 Kubernetes Context 和 Namespace 的介面流程
-function switch_context_and_namespace_interface(){
+function ask_switch_context_and_namespace_interface(){
   get_current_context
   read -p "你想要切換 Kubernetes Context 嗎? (y/n): " SWITCH_CONTEXT
   if [[ "$SWITCH_CONTEXT" =~ ^[Yy]$ ]]; then
@@ -67,7 +67,7 @@ function switch_context_and_namespace_interface(){
 }
 
 # 實作切換 Kubernetes Context 的介面流程
-function switch_context_interface() {
+function ask_switch_context_interface() {
   get_current_context
   read -p "你想要切換 Kubernetes Context 嗎? (y/n): " SWITCH_CONTEXT
   if [[ "$SWITCH_CONTEXT" =~ ^[Yy]$ ]]; then
@@ -84,7 +84,7 @@ function switch_context_interface() {
 }
 
 # 實作切換 Kubernetes Namespace 的介面流程
-function switch_namespace_interface() {
+function ask_switch_namespace_interface() {
   get_current_namespace
   read -p "你想要切換 Kubernetes Namespace 嗎? (y/n): " SWITCH_NAMESPACE
   if [[ "$SWITCH_NAMESPACE" =~ ^[Yy]$ ]]; then
