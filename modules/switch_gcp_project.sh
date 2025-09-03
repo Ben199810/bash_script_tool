@@ -51,7 +51,7 @@ switch_gcp_project() {
   fi
 }
 
-switch_gcp_project_interface() {
+ask_switch_gcp_project_interface() {
   get_current_gcp_project
 
   read -p "你想要切換 GCP 專案嗎? (y/n): " SWITCH_PROJECT
