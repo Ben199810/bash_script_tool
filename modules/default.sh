@@ -7,13 +7,6 @@ PURPLE='\033[0;35m'
 CYAN='\033[0;36m'
 NC='\033[0m' # No Color
 
-# 光標控制碼
-CLEAR_LINE='\033[2K'  # 清除整行內容
-CURSOR_HOME='\033[0G' # 將光標移動到行首
-CLEAR_LINE_AND_HOME='\033[2K\033[0G' # 清除整行並將光標移到行首
-
-
-
 # 全域變數
 SEARCH_KEYWORD=""
 # 函數：請使用者輸入要搜尋的關鍵字
