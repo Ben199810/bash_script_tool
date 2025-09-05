@@ -8,34 +8,6 @@ query_service_account_details(){
   echo -e "${GREEN}✅ Service Account 基本資訊查詢完成！${NC}"
 }
 
-query_workload_identity() {
-  local SERVICE_ACCOUNT="$1"
-  local WI_RESULT
-
-  echo -e "${BLUE}=== 查詢 Workload Identity 綁定 ===${NC}"
-  # 獲取完整的 IAM policy
-  WI_RESULT=$(gcloud iam service-accounts get-iam-policy "$SERVICE_ACCOUNT" \
-    --project="$CURRENT_PROJECT" \
-    --format="json")
-  # 檢查結果是否為空或無效
-  if [ -z "$WI_RESULT" ] || [ "$WI_RESULT" = "{}" ] || [ "$WI_RESULT" = "null" ]; then
-    echo -e "${YELLOW}該 Service Account 沒有任何 IAM 政策綁定${NC}"
-    exit 0
-  fi
-  # 提取並顯示 bindings 資訊
-  local BINDINGS=$(echo "$WI_RESULT" | jq -r '.bindings[]? | "\(.role): \(.members | join(", "))"')
-  if [ -n "$BINDINGS" ]; then
-    echo -e "${GREEN}找到以下 Bindings：${NC}"
-    echo "$BINDINGS" | while IFS=': ' read -r role members; do
-      echo -e "${YELLOW}角色: ${CYAN}$role${NC}"
-      echo -e "${YELLOW}成員: ${CYAN}$members${NC}"
-    done
-  else
-    echo -e "${YELLOW}沒有找到任何 Bindings${NC}"
-  fi
-  echo -e "${GREEN}✅ Workload Identity 查詢完成！${NC}"
-}
-
 check_gke_workload_identity() {
   echo -e "${BLUE}=== GKE 集群 Workload Identity 設定檢查 ===${NC}"
   # 取得所有 GKE 集群
