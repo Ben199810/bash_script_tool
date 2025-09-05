@@ -4,8 +4,10 @@ get_current_gcp_project() {
   
   if [[ -n "$CURRENT_PROJECT_NAME" ]]; then
     echo -e "${BLUE}當前的 GCP 專案: $CURRENT_PROJECT_ID ($CURRENT_PROJECT_NAME)${NC}"
+    echo ""
   else
     echo -e "${BLUE}當前的 GCP 專案: $CURRENT_PROJECT_ID${NC}"
+    echo ""
   fi
 }
 

@@ -1,16 +1,3 @@
-choose_service_account() {
-  SERVICE_ACCOUNT=$(gcloud iam service-accounts list \
-    --project="$CURRENT_PROJECT" \
-    --format="value(email)" | \
-    fzf --prompt="選擇 Service Account: " --height=60% --border)
-  # 檢查是否選擇了 Service Account
-  if [ -z "$SERVICE_ACCOUNT" ]; then
-    echo -e "${YELLOW}未選擇 Service Account，退出腳本${NC}"
-    exit 0
-  fi
-  echo -e "${GREEN}已選擇 Service Account: ${YELLOW}$SERVICE_ACCOUNT${NC}"
-}
-
 query_service_account_details(){
   local SERVICE_ACCOUNT="$1"
 
@@ -19,27 +6,6 @@ query_service_account_details(){
     --project="$CURRENT_PROJECT" \
     --format="table(displayName:label='顯示名稱',description:label='描述',disabled:label='是否停用')"
   echo -e "${GREEN}✅ Service Account 基本資訊查詢完成！${NC}"
-}
-
-query_iam_permissions() {
-  local SERVICE_ACCOUNT="$1"
-  echo -e "${BLUE}=== 專案層級的 IAM 角色權限 ===${NC}"
-
-  # 使用更詳細的查詢格式
-  local IAM_RESULT
-  IAM_RESULT=$(gcloud projects get-iam-policy "$CURRENT_PROJECT" \
-    --flatten="bindings[].members" \
-    --format="value(bindings.role)" \
-    --filter="bindings.members:$SERVICE_ACCOUNT")
-  if [ -n "$IAM_RESULT" ]; then
-    echo -e "${GREEN}找到以下 IAM 角色：${NC}"
-    echo "$IAM_RESULT" | while read -r role; do
-      echo -e "${YELLOW}• $role${NC}"
-    done
-  else
-    echo -e "${YELLOW}該 Service Account 在專案層級沒有 IAM 角色${NC}"
-  fi
-  echo -e "${GREEN}✅ IAM 角色權限查詢完成！${NC}"
 }
 
 query_workload_identity() {
