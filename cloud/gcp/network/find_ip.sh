@@ -36,25 +36,33 @@ function ask_search_filter() {
             "quick")
                 echo "已選擇快速搜尋模式"
                 SEARCH_PROJECTS=(
-                  rd-gateway          # rd-gateway
-                  gcp-202011216-001   # rd-gateway2
-                  rd6-project         # pid-project(bbgp)
-                  gcp-20210526-001    # pid common
-                  gcp-20220425-012    # bbin-platform-prod
-                  gcp-20220425-011    # bbin-platform-qa
-                  gcp-20220425-010    # bbin-platform-dev
-                  gcp-20220425-015    # bbin-outside-prod
-                  gcp-20220425-014    # bbin-outside-qa
-                  gcp-20220425-013    # bbin-outside-dev
-                  gcp-20220425-006    # bbin-interface-prod
-                  gcp-20220425-005    # bbin-interface-qa
-                  gcp-20220425-004    # bbin-interface-dev
-                  gcp-20221202-003    # bb-chat-dev
-                  gcp-20221202-002    # bb-chat-qa
-                  gcp-20221202-001    # bb-chat-prod
-                  gcp-20231102-003    # bbin-pa-prod
-                  gcp-20231102-002    # bbin-pa-qa
-                  gcp-20231102-001    # bbin-pa-dev
+                  rd-gateway        # rd-gateway
+                  gcp-202011216-001 # rd-gateway2
+                  rd6-project       # pid-project(bbgp)
+                  gcp-20210526-001  # pid common
+                  gcp-20220425-012  # bbin-platform-prod
+                  gcp-20240131-025  # bbin-platform-staging
+                  gcp-20220425-011  # bbin-platform-qa
+                  gcp-20220425-010  # bbin-platform-dev
+                  gcp-20220425-015  # bbin-outside-prod
+                  gcp-20240131-026  # bbin-outside-staging
+                  gcp-20220425-014  # bbin-outside-qa
+                  gcp-20220425-013  # bbin-outside-dev
+                  gcp-20220425-006  # bbin-interface-prod
+                  gcp-20240131-024  # bbin-interface-staging
+                  gcp-20220425-005  # bbin-interface-qa
+                  gcp-20220425-004  # bbin-interface-dev
+                  gcp-20221202-001  # bb-chat-prod
+                  gcp-20240426-001  # bb-chat-staging
+                  gcp-20221202-002  # bb-chat-qa
+                  gcp-20221202-003  # bb-chat-dev
+                  gcp-20231102-003  # bbin-pa-prod
+                  gcp-20240131-028  # bbin-pa-staging
+                  gcp-20231102-002  # bbin-pa-qa
+                  gcp-20231102-001  # bbin-pa-dev
+                  ph-btg-pd         # midori-pd-prod
+                  midori-pd-staging # midori-pd-staging
+                  midori-pd-it      # midori-pd-it
                 )
                 break
                 ;;
