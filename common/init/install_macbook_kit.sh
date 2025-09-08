@@ -6,6 +6,8 @@ source ${DIR}/../default.sh
 function main() {
   check_and_install_brew
   check_and_install_iterm2
+  check_and_install_zsh
+  check_and_install_ohmyzsh
 }
 
 main
