@@ -1,67 +1,85 @@
-check_brew() {
-  # 檢查是否安裝 brew
+function check_and_install_brew() {
   if ! brew -v &> /dev/null; then
     echo -e "${RED}brew 未安裝，請先安裝 brew。${NC}"
+    echo ""
 
-    # 安裝 brew
     echo -e "${YELLOW}開始自動安裝 brew...${NC}"
-    bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+    /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 
-    # 再次檢查是否安裝成功
     if ! brew -v &> /dev/null; then
       echo -e "${RED}brew 安裝失敗，請手動安裝。${NC}"
+      echo -e "${YELLOW}請參考官網指引：https://brew.sh${NC}"
       exit 1
     else
       echo -e "${GREEN}brew 安裝成功。${NC}"
+      echo ""
     fi
   else
     echo -e "${GREEN}brew 已安裝。${NC}"
+    echo ""
   fi
 }
 
-check_iterm2() {
-  # 檢查是否安裝 iterm2
+function check_and_install_iterm2() {
   if ! open -a iTerm &> /dev/null; then
     echo -e "${RED}iTerm2 未安裝，請先安裝 iTerm2。${NC}"
-    
-    # 安裝 iterm2
+    echo ""
+
     echo -e "${YELLOW}開始自動安裝 iTerm2...${NC}"
     brew install iterm2
 
-    # 再次檢查是否安裝成功
     if ! open -a iTerm &> /dev/null; then
       echo -e "${RED}iTerm2 安裝失敗，請手動安裝。${NC}"
       exit 1
     else
       echo -e "${GREEN}iTerm2 安裝成功。${NC}"
+      echo ""
     fi
   else
     echo -e "${GREEN}iTerm2 已安裝。${NC}"
+    echo ""
   fi
 }
 
-check_zsh() {
-  # 檢查是否安裝 zsh
+function check_and_install_zsh() {
   if ! zsh --version &> /dev/null; then
     echo -e "${RED}zsh 未安裝，請先安裝 zsh。${NC}"
+    echo ""
 
-    # 安裝 zsh
     echo -e "${YELLOW}開始自動安裝 zsh...${NC}"
     brew install zsh
 
-    # 安裝 oh-my-zsh
-    echo -e "${YELLOW}開始自動安裝 oh-my-zsh...${NC}"
-    sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
-
-    # 再次檢查是否安裝成功
     if ! zsh --version &> /dev/null; then
       echo -e "${RED}zsh 安裝失敗，請手動安裝。${NC}"
       exit 1
     else
       echo -e "${GREEN}zsh 安裝成功。${NC}"
+      echo ""
     fi
   else
     echo -e "${GREEN}zsh 已安裝。${NC}"
+    echo ""
+  fi
+}
+
+function check_and_install_ohmyzsh() {
+  if [ ! -d "$HOME/.oh-my-zsh" ]; then
+    echo -e "${RED}oh-my-zsh 未安裝，請先安裝 oh-my-zsh。${NC}"
+    echo ""
+
+    echo -e "${YELLOW}開始自動安裝 oh-my-zsh...${NC}"
+    sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
+
+    if [ ! -d "$HOME/.oh-my-zsh" ]; then
+      echo -e "${RED}oh-my-zsh 安裝失敗，請手動安裝。${NC}"
+      exit 1
+    else
+      echo -e "${GREEN}oh-my-zsh 安裝成功。${NC}"
+      echo ""
+    fi
+  else
+    echo -e "${GREEN}oh-my-zsh 已安裝。${NC}"
+    echo ""
   fi
 }
 
