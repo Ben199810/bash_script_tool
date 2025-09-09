@@ -26,8 +26,6 @@ function switch_context() {
 function switch_namespace(){
   TARGET_NAMESPACE=$1
   if [ -n "$TARGET_NAMESPACE" ]; then
-    # 去除前綴 "namespace/"
-    TARGET_NAMESPACE=${TARGET_NAMESPACE#namespace/}
     kubectl config set-context --current --namespace="$TARGET_NAMESPACE"
   else
     echo -e "${RED}未選擇命名空間，退出。${NC}"
@@ -52,7 +50,7 @@ function ask_switch_context_and_namespace_interface(){
   get_current_namespace
   read -p "你想要切換 Kubernetes Namespace 嗎? (y/n): " SWITCH_NAMESPACE
   if [[ "$SWITCH_NAMESPACE" =~ ^[Yy]$ ]]; then
-    local SELECT_NAMESPACE=$(kubectl get namespaces -o name | fzf --prompt="Select a namespace: ")
+    local SELECT_NAMESPACE=$(kubectl get namespaces -o name | sed 's/namespace\///' | fzf --prompt="Select a namespace: ")
     switch_namespace $SELECT_NAMESPACE
     echo -e "${GREEN}已切換到 Kubernetes Namespace: $SELECT_NAMESPACE${NC}"
     echo ""
@@ -88,7 +86,7 @@ function ask_switch_namespace_interface() {
   get_current_namespace
   read -p "你想要切換 Kubernetes Namespace 嗎? (y/n): " SWITCH_NAMESPACE
   if [[ "$SWITCH_NAMESPACE" =~ ^[Yy]$ ]]; then
-    local SELECT_NAMESPACE=$(kubectl get namespaces -o name | fzf --prompt="Select a namespace: ")
+    local SELECT_NAMESPACE=$(kubectl get namespaces -o name | sed 's/namespace\///' | fzf --prompt="Select a namespace: ")
     switch_namespace $SELECT_NAMESPACE
     echo -e "${GREEN}已切換到 Kubernetes Namespace: $SELECT_NAMESPACE${NC}"
     echo ""
