@@ -49,6 +49,7 @@ function select_kubernetes_resources() {
     local RESOURCE_TYPE_ARRAY=(
       pod
       pdb
+      service
     )
     RESOURCE_TYPE=$(printf "%s\n" "${RESOURCE_ARRAY[@]}" | fzf --prompt="選擇 Kubernetes 資源類型: ")
 }
