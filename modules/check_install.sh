@@ -19,21 +19,21 @@ function check_and_install_brew() {
     echo ""
   fi
 }
-
 function check_and_install_iterm2() {
   if ! open -a iTerm &> /dev/null; then
     echo -e "${RED}iTerm2 未安裝，請先安裝 iTerm2。${NC}"
     echo ""
 
     echo -e "${YELLOW}開始自動安裝 iTerm2...${NC}"
-    brew install iterm2
+    brew install --cask iterm2
 
-    if ! open -a iTerm &> /dev/null; then
-      echo -e "${RED}iTerm2 安裝失敗，請手動安裝。${NC}"
-      exit 1
-    else
+    # 安裝後再次檢查
+    if [ -d "/Applications/iTerm.app" ] || mdfind "kMDItemCFBundleIdentifier == 'com.googlecode.iterm2'" | grep -q "iTerm.app"; then
       echo -e "${GREEN}iTerm2 安裝成功。${NC}"
       echo ""
+    else
+      echo -e "${RED}iTerm2 安裝失敗，請手動安裝。${NC}"
+      exit 1
     fi
   else
     echo -e "${GREEN}iTerm2 已安裝。${NC}"
@@ -93,7 +93,7 @@ check_kubectl() {
     brew install kubectl
 
     # 再次檢查是否安裝成功
-    if ! kubectl version &> /dev/null; then
+    if ! kubectl version --client &> /dev/null; then
       echo -e "${RED}kubectl 安裝失敗，請手動安裝。${NC}"
       exit 1
     else
@@ -101,6 +101,7 @@ check_kubectl() {
     fi
   else
     echo -e "${GREEN}kubectl 已安裝。${NC}"
+    echo ""
   fi
 }
 
@@ -122,6 +123,7 @@ check_helm() {
     fi
   else
     echo -e "${GREEN}helm 已安裝。${NC}"
+    echo ""
   fi
 }
 
@@ -143,6 +145,7 @@ check_awscli() {
     fi
   else
     echo -e "${GREEN}awscli 已安裝。${NC}"
+    echo ""
   fi
 }
 
@@ -172,6 +175,7 @@ install_session_manager() {
   # 檢查是否已安裝 AWS Session Manager Plugin
   if command -v session-manager-plugin &> /dev/null; then
     echo -e "${GREEN}AWS Session Manager Plugin 已安裝。${NC}"
+    echo ""
     return 0
   fi
 
@@ -192,8 +196,63 @@ install_session_manager() {
   rm -rf sessionmanager-bundle.zip sessionmanager-bundle
 }
 
-uninstall_session_manager() {
-  # 卸載 AWS Session Manager Plugin
-  sudo rm -rf /usr/local/sessionmanagerplugin
-  sudo rm /usr/local/bin/session-manager-plugin
+function check_and_install_gitkraken() {
+  # 使用多種方法檢查 GitKraken 是否已安裝
+  if [ -d "/Applications/GitKraken.app" ] || mdfind "kMDItemCFBundleIdentifier == 'com.axosoft.gitkraken'" | grep -q "GitKraken.app"; then
+    echo -e "${GREEN}GitKraken 已安裝。${NC}"
+    echo ""
+    return 0
+  fi
+  
+  if ! open -a "GitKraken" &> /dev/null; then
+    echo -e "${RED}GitKraken 未安裝，請先安裝 GitKraken。${NC}"
+    echo ""
+
+    echo -e "${YELLOW}開始自動安裝 GitKraken...${NC}"
+    brew install --cask gitkraken
+    sleep 5
+
+    # 安裝後再次檢查
+    if [ -d "/Applications/GitKraken.app" ] || mdfind "kMDItemCFBundleIdentifier == 'com.axosoft.gitkraken'" | grep -q "GitKraken.app"; then
+      echo -e "${GREEN}GitKraken 安裝成功。${NC}"
+      echo ""
+    else
+      echo -e "${RED}GitKraken 安裝失敗，請手動安裝。${NC}"
+      exit 1
+    fi
+  else
+    echo -e "${GREEN}GitKraken 已安裝。${NC}"
+    echo ""
+  fi
 }
+
+# 安裝 docker desktop GUI 介面
+function check_and_install_docker() {
+  if [ -d "/Applications/Docker.app" ] || mdfind "kMDItemCFBundleIdentifier == 'com.docker.docker'" | grep -q "Docker.app"; then
+    echo -e "${GREEN}Docker Desktop 已安裝。${NC}"
+    echo ""
+    return 0
+  fi
+
+  if ! open -a Docker &> /dev/null; then
+    echo -e "${RED}Docker Desktop 未安裝，請先安裝 Docker Desktop。${NC}"
+    echo ""
+
+    echo -e "${YELLOW}開始自動安裝 Docker Desktop...${NC}"
+    brew install --cask docker-desktop
+    sleep 5
+
+    # 安裝後再次檢查
+    if [ -d "/Applications/Docker.app" ] || mdfind "kMDItemCFBundleIdentifier == 'com.docker.docker'" | grep -q "Docker.app"; then
+      echo -e "${GREEN}Docker Desktop 安裝成功。${NC}"
+      echo ""
+    else
+      echo -e "${RED}Docker Desktop 安裝失敗，請手動安裝。${NC}"
+      exit 1
+    fi
+  else
+    echo -e "${GREEN}Docker Desktop 已安裝。${NC}"
+    echo ""
+  fi
+}
+
