@@ -20,10 +20,14 @@ function check_and_install_brew() {
   fi
 }
 function check_and_install_iterm2() {
-  if ! open -a iTerm &> /dev/null; then
-    echo -e "${RED}iTerm2 未安裝，請先安裝 iTerm2。${NC}"
+  # 使用多種方法檢查 iTerm2 是否已安裝
+  if [ -d "/Applications/iTerm.app" ] || mdfind "kMDItemCFBundleIdentifier == 'com.googlecode.iterm2'" | grep -q "iTerm.app"; then
+    echo -e "${GREEN}iTerm2 已安裝。${NC}"
     echo ""
+    return 0
+  fi
 
+  if ! open -a iTerm &> /dev/null; then
     echo -e "${YELLOW}開始自動安裝 iTerm2...${NC}"
     brew install --cask iterm2
 
