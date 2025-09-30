@@ -1,24 +1,49 @@
+# 安裝 brew 作為套件管理工具。
 function check_and_install_brew() {
   if ! brew -v &> /dev/null; then
-    echo -e "${RED}brew 未安裝，請先安裝 brew。${NC}"
-    echo ""
+    echo -e "${RED}brew 未安裝，請先安裝 brew。${NC}\n"
 
-    echo -e "${YELLOW}開始自動安裝 brew...${NC}"
+    echo -e "${YELLOW}開始自動安裝 brew...${NC}\n"
+
     /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 
     if ! brew -v &> /dev/null; then
       echo -e "${RED}brew 安裝失敗，請手動安裝。${NC}"
-      echo -e "${YELLOW}請參考官網指引：https://brew.sh${NC}"
+      echo -e "${YELLOW}請參考官網指引：https://brew.sh${NC}\n"
       exit 1
     else
-      echo -e "${GREEN}brew 安裝成功。${NC}"
-      echo ""
+      echo -e "${GREEN}brew 安裝成功。${NC}\n"
     fi
   else
-    echo -e "${GREEN}brew 已安裝。${NC}"
-    echo ""
+    echo -e "${GREEN}brew 已安裝。${NC}\n"
   fi
 }
+
+# npm 相關的套件安裝。
+function npm_install_kit() {
+  local KIT_ARRAY=${1:-""}
+  # 檢查 Node.js 是否安裝
+  if ! node -v &> /dev/null; then
+    echo -e "${RED}Node.js 未安裝，請先安裝 Node.js。${NC}"
+    echo -e "${YELLOW}開始自動安裝 Node.js...${NC}\n"
+    brew install node
+  fi
+  if [ -z "$KIT_ARRAY" ]; then
+    echo -e "${RED}請提供要安裝的 npm 套件清單。${NC}\n"
+  else
+    echo -e "${YELLOW}開始安裝 npm 套件...${NC}\n"
+    for kit in ${KIT_ARRAY[@]}; do
+      echo -e "${YELLOW}正在安裝 ${kit}...${NC}"
+      npm install -g "$kit". # 全域安裝
+      # 檢查安裝是否成功
+      if ! npm list -g --depth=0 | grep -q "$kit@"; then
+        echo -e "${RED}${kit} 安裝失敗。${NC}\n"
+        exit 1
+      fi
+    done
+  fi
+}
+
 function check_and_install_iterm2() {
   # 使用多種方法檢查 iTerm2 是否已安裝
   if [ -d "/Applications/iTerm.app" ] || mdfind "kMDItemCFBundleIdentifier == 'com.googlecode.iterm2'" | grep -q "iTerm.app"; then
