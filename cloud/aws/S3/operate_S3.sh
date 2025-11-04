@@ -4,6 +4,7 @@ source ../../../modules/default.sh
 # 操作選項陣列
 OPERATION_OPTIONS=(
   "查詢區域 S3 Bucket 列表"
+  "Bucket 之間同步資料 (同一個 Account)"
 )
 
 # 顯示操作選項並讓使用者選擇
@@ -61,6 +62,77 @@ function list_s3_buckets() {
   fi
 }
 
+# Bucket 之間同步資料
+function sync_s3_buckets() {
+  local source_region=""
+  local source_bucket=""
+  local target_region=""
+  local target_bucket=""
+  local source_path=""
+  local target_path=""
+  
+  echo -e "${CYAN}=== S3 Bucket 同步 ===${NC}"
+  echo ""
+  
+  # 輸入來源 Bucket 資訊
+  read -rp "請輸入來源 Bucket 區域 (預設: ap-southeast-1): " source_region
+  source_region="${source_region:-ap-southeast-1}"
+  
+  read -rp "請輸入來源 Bucket 名稱: " source_bucket
+  if [[ -z "${source_bucket}" ]]; then
+    echo -e "${RED}來源 Bucket 名稱不能為空${NC}"
+    exit 1
+  fi
+  
+  read -rp "請輸入來源路徑 (預設: / 整個 Bucket，例如: /folder/): " source_path
+  source_path="${source_path:-/}"
+  
+  # 輸入目標 Bucket 資訊
+  read -rp "請輸入目標 Bucket 區域 (預設: ap-southeast-1): " target_region
+  target_region="${target_region:-ap-southeast-1}"
+  
+  read -rp "請輸入目標 Bucket 名稱: " target_bucket
+  if [[ -z "${target_bucket}" ]]; then
+    echo -e "${RED}目標 Bucket 名稱不能為空${NC}"
+    exit 1
+  fi
+  
+  read -rp "請輸入目標路徑 (預設: / 整個 Bucket，例如: /folder/): " target_path
+  target_path="${target_path:-/}"
+  
+  # 確認同步操作
+  echo ""
+  echo -e "${YELLOW}=== 同步資訊確認 ===${NC}"
+  echo -e "來源: ${GREEN}s3://${source_bucket}${source_path}${NC} (${source_region})"
+  echo -e "目標: ${GREEN}s3://${target_bucket}${target_path}${NC} (${target_region})"
+  echo ""
+  
+  read -rp "確定要執行同步嗎？(y/N): " confirm
+  if [[ "${confirm}" != "y" ]] && [[ "${confirm}" != "Y" ]]; then
+    echo -e "${YELLOW}已取消同步操作${NC}"
+    exit 0
+  fi
+  
+  # 執行同步
+  echo ""
+  echo -e "${BLUE}開始同步資料...${NC}"
+  
+  local source_uri="s3://${source_bucket}${source_path}"
+  local target_uri="s3://${target_bucket}${target_path}"
+  
+  # 使用 aws s3 sync 指令
+  aws s3 sync "${source_uri}" "${target_uri}" --region "${target_region}" --source-region "${source_region}"
+  
+  if [[ $? -eq 0 ]]; then
+    echo ""
+    echo -e "${GREEN}✓ 同步完成${NC}"
+  else
+    echo ""
+    echo -e "${RED}✗ 同步失敗，請檢查錯誤訊息${NC}"
+    exit 1
+  fi
+}
+
 # 主程式
 function main() {
   show_operation_menu
@@ -71,6 +143,9 @@ function main() {
   case "${choice}" in
     1)
       list_s3_buckets
+      ;;
+    2)
+      sync_s3_buckets
       ;;
     *)
       echo -e "${RED}無效的選項,請選擇 1-${#OPERATION_OPTIONS[@]}${NC}"
