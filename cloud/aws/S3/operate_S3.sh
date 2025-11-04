@@ -81,7 +81,7 @@ function sync_s3_buckets() {
   read -rp "請輸入來源 Bucket 名稱: " source_bucket
   if [[ -z "${source_bucket}" ]]; then
     echo -e "${RED}來源 Bucket 名稱不能為空${NC}"
-    exit 1
+    return 1
   fi
   
   read -rp "請輸入來源路徑 (預設: / 整個 Bucket，例如: /folder/): " source_path
@@ -94,7 +94,7 @@ function sync_s3_buckets() {
   read -rp "請輸入目標 Bucket 名稱: " target_bucket
   if [[ -z "${target_bucket}" ]]; then
     echo -e "${RED}目標 Bucket 名稱不能為空${NC}"
-    exit 1
+    return 1
   fi
   
   read -rp "請輸入目標路徑 (預設: / 整個 Bucket，例如: /folder/): " target_path
@@ -110,7 +110,7 @@ function sync_s3_buckets() {
   read -rp "確定要執行同步嗎？(y/N): " confirm
   if [[ "${confirm}" != "y" ]] && [[ "${confirm}" != "Y" ]]; then
     echo -e "${YELLOW}已取消同步操作${NC}"
-    exit 0
+    return 0
   fi
   
   # 執行同步
@@ -129,7 +129,7 @@ function sync_s3_buckets() {
   else
     echo ""
     echo -e "${RED}✗ 同步失敗，請檢查錯誤訊息${NC}"
-    exit 1
+    return 1
   fi
 }
 
