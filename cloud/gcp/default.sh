@@ -8,7 +8,6 @@ source "modules/switch_gcp_project.sh"
 source "modules/memorystore.sh"
 source "modules/network.sh"
 source "modules/iap.sh"
-source "modules/iam.sh"
 
 # ============================================
 # 主選單
@@ -16,9 +15,6 @@ source "modules/iam.sh"
 
 function main_menu() {
   local MAIN_OPERATIONS=(
-    "IAM - 列出 Service Accounts"
-    "IAM - 查詢 Service Account 角色"
-    "IAM - 查詢 Service Account Workload Identity"
     "Network - 搜尋 IP 地址"
     "IAP - 透過 IAP 連線到 GCE"
     "IAP - 透過 IAP Port Forward 到 Memorystore"
@@ -37,15 +33,6 @@ function main_menu() {
     local OPERATION=$(printf "%s\n" "${MAIN_OPERATIONS[@]}" | fzf --header="選擇操作:" --prompt="操作: ")
     
     case $OPERATION in
-      "IAM - 列出 Service Accounts")
-        list_service_accounts
-        ;;
-      "IAM - 查詢 Service Account 角色")
-        query_service_account_roles
-        ;;
-      "IAM - 查詢 Service Account Workload Identity")
-        query_service_account_workload_identity
-        ;;
       "Network - 搜尋 IP 地址")
         find_ip_in_project
         ;;
