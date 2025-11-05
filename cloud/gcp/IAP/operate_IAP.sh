@@ -1,3 +1,8 @@
+#!/bin/bash
+source ../../../modules/default.sh
+source ../modules/switch_gcp_project.sh
+source ../modules/memorystore.sh
+
 # 取得所有運行中的 GCE 實例
 # 設定全域變數 RUNNING_INSTANCES
 function get_running_gce_instances() {
@@ -55,3 +60,39 @@ function use_iap_tunnel_port_forwarding_memorystore() {
 
   gcloud compute ssh "$jump_instance_name" --zone="$jump_zone" --tunnel-through-iap -- -N -L "$local_port:$MEMORYSTORE_HOST:$MEMORYSTORE_PORT"
 }
+
+# 主函式
+function main() {
+  # 定義操作選項
+  local options=(
+    "透過 IAP 連線到 GCE"
+    "透過 IAP Port Forward 到 Memorystore"
+  )
+
+  while true; do
+    echo -e "\n${BLUE}=== GCP IAP 操作選單 ===${NC}"
+    PS3=$'\n請選擇操作: '
+    
+    select opt in "${options[@]}"; do
+      case "${REPLY}" in
+        1)
+          echo -e "\n${GREEN}執行: 透過 IAP 連線到 GCE${NC}"
+          start_iap_tunnel
+          break
+          ;;
+        2)
+          echo -e "\n${GREEN}執行: 透過 IAP Port Forward 到 Memorystore${NC}"
+          use_iap_tunnel_port_forwarding_memorystore
+          break
+          ;;
+        *)
+          echo -e "${RED}無效的選項,請重新選擇${NC}"
+          break
+          ;;
+      esac
+    done
+  done
+}
+
+# 執行主函式
+main
