@@ -61,38 +61,45 @@ function use_iap_tunnel_port_forwarding_memorystore() {
   gcloud compute ssh "$jump_instance_name" --zone="$jump_zone" --tunnel-through-iap -- -N -L "$local_port:$MEMORYSTORE_HOST:$MEMORYSTORE_PORT"
 }
 
-# 主函式
-function main() {
-  # 定義操作選項
-  local options=(
-    "透過 IAP 連線到 GCE"
-    "透過 IAP Port Forward 到 Memorystore"
-  )
+# 操作選項陣列
+OPERATION_OPTIONS=(
+  "透過 IAP 連線到 GCE"
+  "透過 IAP Port Forward 到 Memorystore"
+)
 
-  while true; do
-    echo -e "\n${BLUE}=== GCP IAP 操作選單 ===${NC}"
-    PS3=$'\n請選擇操作: '
-    
-    select opt in "${options[@]}"; do
-      case "${REPLY}" in
-        1)
-          echo -e "\n${GREEN}執行: 透過 IAP 連線到 GCE${NC}"
-          start_iap_tunnel
-          break
-          ;;
-        2)
-          echo -e "\n${GREEN}執行: 透過 IAP Port Forward 到 Memorystore${NC}"
-          use_iap_tunnel_port_forwarding_memorystore
-          break
-          ;;
-        *)
-          echo -e "${RED}無效的選項,請重新選擇${NC}"
-          break
-          ;;
-      esac
-    done
+# 顯示操作選項並讓使用者選擇
+function show_operation_menu() {
+  printf "%b%s%b\n" "${CYAN}" "=== GCP IAP 操作選單 ===" "${NC}"
+  for i in "${!OPERATION_OPTIONS[@]}"; do
+    printf "%b%d)%b %s\n" "${YELLOW}" $((i + 1)) "${NC}" "${OPERATION_OPTIONS[$i]}"
   done
+  printf "\n"
 }
 
-# 執行主函式
+# 主程式
+function main() {
+  # 初始化：詢問是否切換專案
+  ask_switch_gcp_project_interface
+  
+  show_operation_menu
+  
+  local choice=""
+  read -rp "請選擇操作選項 (1-${#OPERATION_OPTIONS[@]}): " choice
+  
+  case "${choice}" in
+    1)
+      start_iap_tunnel
+      ;;
+    2)
+      use_iap_tunnel_port_forwarding_memorystore
+      ;;
+    *)
+      printf "%b%s%b\n" "${RED}" "無效的選項,請選擇 1-${#OPERATION_OPTIONS[@]}" "${NC}"
+      exit 1
+      ;;
+  esac
+  
+  printf "%b%s%b\n" "${GREEN}" "✅ 操作完成！" "${NC}"
+}
+
 main
