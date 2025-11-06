@@ -1,3 +1,8 @@
+#!/bin/bash
+source ../../../modules/default.sh
+source ../modules/switch_gcp_project.sh
+source ../modules/memorystore.sh
+
 # 取得所有運行中的 GCE 實例
 # 設定全域變數 RUNNING_INSTANCES
 function get_running_gce_instances() {
@@ -55,3 +60,46 @@ function use_iap_tunnel_port_forwarding_memorystore() {
 
   gcloud compute ssh "$jump_instance_name" --zone="$jump_zone" --tunnel-through-iap -- -N -L "$local_port:$MEMORYSTORE_HOST:$MEMORYSTORE_PORT"
 }
+
+# 操作選項陣列
+OPERATION_OPTIONS=(
+  "透過 IAP 連線到 GCE"
+  "透過 IAP Port Forward 到 Memorystore"
+)
+
+# 顯示操作選項並讓使用者選擇
+function show_operation_menu() {
+  printf "%b%s%b\n" "${CYAN}" "=== GCP IAP 操作選單 ===" "${NC}"
+  for i in "${!OPERATION_OPTIONS[@]}"; do
+    printf "%b%d)%b %s\n" "${YELLOW}" $((i + 1)) "${NC}" "${OPERATION_OPTIONS[$i]}"
+  done
+  printf "\n"
+}
+
+# 主程式
+function main() {
+  # 初始化：詢問是否切換專案
+  ask_switch_gcp_project_interface
+  
+  show_operation_menu
+  
+  local choice=""
+  read -rp "請選擇操作選項 (1-${#OPERATION_OPTIONS[@]}): " choice
+  
+  case "${choice}" in
+    1)
+      start_iap_tunnel
+      ;;
+    2)
+      use_iap_tunnel_port_forwarding_memorystore
+      ;;
+    *)
+      printf "%b%s%b\n" "${RED}" "無效的選項,請選擇 1-${#OPERATION_OPTIONS[@]}" "${NC}"
+      exit 1
+      ;;
+  esac
+  
+  printf "%b%s%b\n" "${GREEN}" "✅ 操作完成！" "${NC}"
+}
+
+main
